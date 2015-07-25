@@ -4,12 +4,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReferenceGenerator", "src\ReferenceGenerator\ReferenceGenerator.csproj", "{D3F17CBE-FC99-4B13-92CC-0AD3A1CDEFE7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CC97C224-BAEE-44BB-98E0-77B959D24105} = {CC97C224-BAEE-44BB-98E0-77B959D24105}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2051B7B0-11F4-4ED1-8BEA-4E1A79663A25}"
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleClassLibrary", "tests\SampleClassLibrary\SampleClassLibrary.csproj", "{CC97C224-BAEE-44BB-98E0-77B959D24105}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleCoreLibrary", "tests\SampleCoreLibrary\SampleCoreLibrary.csproj", "{4B64D7B3-A396-45CC-9B8C-DAA868E7BB81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +28,14 @@ Global
 		{D3F17CBE-FC99-4B13-92CC-0AD3A1CDEFE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3F17CBE-FC99-4B13-92CC-0AD3A1CDEFE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3F17CBE-FC99-4B13-92CC-0AD3A1CDEFE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC97C224-BAEE-44BB-98E0-77B959D24105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC97C224-BAEE-44BB-98E0-77B959D24105}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC97C224-BAEE-44BB-98E0-77B959D24105}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC97C224-BAEE-44BB-98E0-77B959D24105}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B64D7B3-A396-45CC-9B8C-DAA868E7BB81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B64D7B3-A396-45CC-9B8C-DAA868E7BB81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B64D7B3-A396-45CC-9B8C-DAA868E7BB81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B64D7B3-A396-45CC-9B8C-DAA868E7BB81}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
