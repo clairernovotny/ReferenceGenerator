@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace ReferenceGenerator
 {
@@ -11,22 +12,55 @@ namespace ReferenceGenerator
     {
         static void Main(string[] args)
         {
-            string path = args[0];
+            // args 0: nuspec file
+            // args 1: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0
+            // args 2: target files, semi-colon joined
 
-            if (File.Exists(path))
+            string path = args[0];
+            string[] tfms = args[1].Split(';');
+            string[] files = args[2].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+
+
+            // hashset for storage
+            var references = new HashSet<Reference>();
+
+            foreach(var file in files)
             {
                 try
                 {
-                    var assm = AssemblyInfo.GetAssemblyInfo(path);
-                    CheckRefs(assm);
+                    var assm = AssemblyInfo.GetAssemblyInfo(file);
+                    foreach (var r in assm.References)
+                        references.Add(r);
+
                 }
-                catch (InvalidOperationException)
-                { }
+                catch(InvalidOperationException)
+                {
+                    // Log error
+                }
             }
-            else
-            {
-                Console.WriteLine("Error, file doesn't exist");
-            }
+
+
+            // Now squash all but most recent
+            var groups = references.GroupBy(k => k.Name, StringComparer.OrdinalIgnoreCase)
+                                   .Select(g => 
+                                            g.OrderByDescending(r => r.Version)
+                                             .First()
+                                           )
+                                   .OrderBy(r => r.Name)
+                                   .ToList();
+
+
+            // Read nuspec as xml
+            var xdoc = XDocument.Load(path);
+            // get dependencies and add them.
+            //try
+            //{
+            //    var assm = AssemblyInfo.GetAssemblyInfo(path);
+            //    CheckRefs(assm);
+            //}
+            //catch (InvalidOperationException)
+            //{ }
+
         }
 
         private static void CheckRefs(AssemblyInfo assm)
