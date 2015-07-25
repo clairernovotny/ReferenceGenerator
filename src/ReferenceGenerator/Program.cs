@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace ReferenceGenerator
 {
@@ -49,18 +51,64 @@ namespace ReferenceGenerator
                                    .OrderBy(r => r.Name)
                                    .ToList();
 
-
+            XmlNamespaceManager nsm;
             // Read nuspec as xml
-            var xdoc = XDocument.Load(path);
-            // get dependencies and add them.
-            //try
-            //{
-            //    var assm = AssemblyInfo.GetAssemblyInfo(path);
-            //    CheckRefs(assm);
-            //}
-            //catch (InvalidOperationException)
-            //{ }
+            using (var reader = XmlReader.Create(path))
+            {
+                nsm = new XmlNamespaceManager(reader.NameTable);
+                nsm.AddNamespace("ns", ns.NamespaceName);
+            }
 
+            var xdoc = XDocument.Load(path);
+            var deps = GetOrCreateDependenciesNode(xdoc);
+
+                foreach (var tfm in tfms)
+                {
+                    var ele = CreateDependencyElement(tfm, groups);
+
+                    // see if we have a node with this tfm
+                    var grp = deps.XPathSelectElement($"./ns:group[@targetFramework='dotnet']", nsm);
+                    if (grp != null)
+                    {
+                        grp.Remove();
+                    }
+                    deps.Add(ele);
+                    
+                }
+            
+
+
+            xdoc.Save(path, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error
+
+        }
+
+        static XNamespace ns = "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd";
+
+        private static XElement GetOrCreateDependenciesNode(XDocument doc)
+        {
+            var mde = doc.Root.Element(ns + "metadata");
+
+            var deps = mde.Element(ns + "dependencies");
+
+            if (deps == null)
+            {
+                deps = new XElement(ns + "dependencies");
+                mde.Add(deps);
+            }
+
+            return deps;
+        }
+
+        private static XElement CreateDependencyElement(string tfm, IEnumerable<Reference> refs)
+        {
+            var ele = new XElement(ns + "group", new XAttribute("targetFramework", tfm),
+                refs.Select(r =>
+                    new XElement(ns + "dependency",
+                        new XAttribute("id", r.Name),
+                        new XAttribute("version", r.Version.ToString(3))
+                                )));
+
+            return ele;
         }
 
         private static void CheckRefs(AssemblyInfo assm)

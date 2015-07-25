@@ -6,5 +6,16 @@
     <authors>Author</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>My package description.</description>
+    <dependencies>
+      <group targetFramework="dotnet">
+        <dependency id="System.Net.Requests" version="3.9.0" />
+        <dependency id="System.Reflection" version="4.0.10" />
+        <dependency id="System.Reflection.Extensions" version="4.0.0" />
+        <dependency id="System.Reflection.TypeExtensions" version="4.0.0" />
+        <dependency id="System.Resources.ResourceManager" version="4.0.0" />
+        <dependency id="System.Runtime" version="4.0.20" />
+        <dependency id="System.Xml.XDocument" version="4.0.10" />
+      </group>
+    </dependencies>
   </metadata>
 </package>
