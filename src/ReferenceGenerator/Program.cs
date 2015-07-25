@@ -20,7 +20,7 @@ namespace ReferenceGenerator
             // args 2: target files, semi-colon joined
 
             string path = args[0];
-            string[] tfms = args[1].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(); 
+            string[] tfms = args[1].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
             string[] files = args[2].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
 
 
@@ -30,7 +30,7 @@ namespace ReferenceGenerator
             // hashset for storage
             var references = new HashSet<Reference>();
 
-            foreach(var file in files)
+            foreach (var file in files)
             {
                 try
                 {
@@ -43,7 +43,7 @@ namespace ReferenceGenerator
                     }
 
                 }
-                catch(InvalidOperationException)
+                catch (InvalidOperationException)
                 {
                     // Log error
                 }
@@ -52,12 +52,14 @@ namespace ReferenceGenerator
 
             // Now squash all but most recent
             var groups = references.GroupBy(k => k.Name, StringComparer.OrdinalIgnoreCase)
-                                   .Select(g => 
+                                   .Select(g =>
                                             g.OrderByDescending(r => r.Version)
                                              .First()
                                            )
                                    .OrderBy(r => r.Name)
                                    .ToList();
+
+            var refNames = new HashSet<string>(groups.Select(g => g.Name), StringComparer.OrdinalIgnoreCase);
 
             XmlNamespaceManager nsm;
             // Read nuspec as xml
@@ -70,20 +72,34 @@ namespace ReferenceGenerator
             var xdoc = XDocument.Load(path);
             var deps = GetOrCreateDependenciesNode(xdoc);
 
-                foreach (var tfm in tfms)
-                {
-                    var ele = CreateDependencyElement(tfm, groups);
+            foreach (var tfm in tfms)
+            {
+                var ele = CreateDependencyElement(tfm, groups);
 
-                    // see if we have a node with this tfm
-                    var grp = deps.XPathSelectElement($"./ns:group[@targetFramework='dotnet']", nsm);
-                    if (grp != null)
+                // see if we have a node with this tfm
+                var grp = deps.XPathSelectElement($"./ns:group[@targetFramework='{tfm}']", nsm);
+                if (grp != null)
+                {
+                    // Need to merge
+                    // find nodes that match by name, remove and then readd them
+                    var existing = grp.Elements(ns + "dependency")?.Where(e => refNames.Contains(e.Attribute("id").Value))?.ToList() ?? new List<XElement>();
+
+                    foreach (var xe in existing)
                     {
-                        grp.Remove();
+                        xe.Remove();
                     }
-                    deps.Add(ele);
-                    
+
+                    // Add the new ones back in 
+                    grp.Add(ele.Elements());
                 }
-            
+                else
+                {
+                    deps.Add(ele);
+                }
+                
+
+            }
+
 
 
             xdoc.Save(path, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error

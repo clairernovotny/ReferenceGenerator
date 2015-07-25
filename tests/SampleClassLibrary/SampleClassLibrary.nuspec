@@ -8,6 +8,7 @@
     <description>My package description.</description>
     <dependencies>
       <group targetFramework="dotnet">
+        <dependency id="Newtonsoft.Json" version="7.0.1" />
         <dependency id="System.Net.Requests" version="3.9.0" />
         <dependency id="System.Reflection" version="4.0.10" />
         <dependency id="System.Reflection.Extensions" version="4.0.0" />
