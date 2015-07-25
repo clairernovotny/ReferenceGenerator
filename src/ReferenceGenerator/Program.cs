@@ -17,7 +17,7 @@ namespace ReferenceGenerator
             // args 2: target files, semi-colon joined
 
             string path = args[0];
-            string[] tfms = args[1].Split(';');
+            string[] tfms = args[1].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(); 
             string[] files = args[2].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
 
 
