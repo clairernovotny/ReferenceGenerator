@@ -12,6 +12,7 @@ namespace ReferenceGenerator
 {
     class Program
     {
+        static HashSet<string> MicrosoftRefs;
         static void Main(string[] args)
         {
             // args 0: nuspec file
@@ -23,6 +24,9 @@ namespace ReferenceGenerator
             string[] files = args[2].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
 
 
+            var microsoftRefs = new[] { "Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives" };
+            MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
+
             // hashset for storage
             var references = new HashSet<Reference>();
 
@@ -31,8 +35,12 @@ namespace ReferenceGenerator
                 try
                 {
                     var assm = AssemblyInfo.GetAssemblyInfo(file);
-                    foreach (var r in assm.References)
+                    foreach (var r in FilterReferences(assm.References))
+                    {
+                        // Only include System.* or Microsoft.CSharp, Microsoft.VisualBasic or Microsoft.Win32.Primitives
+                        // Others may not have assm name + ver matching nuget package name + ver
                         references.Add(r);
+                    }
 
                 }
                 catch(InvalidOperationException)
@@ -80,6 +88,15 @@ namespace ReferenceGenerator
 
             xdoc.Save(path, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error
 
+        }
+
+        private static IEnumerable<Reference> FilterReferences(IEnumerable<Reference> references)
+        {
+            foreach(var r in references)
+            {
+                if (MicrosoftRefs.Contains(r.Name) || r.Name.StartsWith("System.", StringComparison.OrdinalIgnoreCase))
+                    yield return r;
+            }
         }
 
         static XNamespace ns = "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd";
