@@ -63,6 +63,10 @@ namespace ReferenceGenerator
 
             var refNames = new HashSet<string>(groups.Select(g => g.Name), StringComparer.OrdinalIgnoreCase);
 
+            // make sure there is no mscorlib
+            if (refNames.Contains("mscorlib"))
+                throw new InvalidOperationException("mscorlib-based projects are not supported");
+
             XmlNamespaceManager nsm;
             // Read nuspec as xml
             using (var reader = XmlReader.Create(path))
