@@ -16,12 +16,14 @@ namespace ReferenceGenerator
         static void Main(string[] args)
         {
             // args 0: nuspec file
-            // args 1: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0
-            // args 2: target files, semi-colon joined
+            // args 1: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references
+            // args 2: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0
+            // args 3: target files, semi-colon joined
 
             string path = args[0];
-            string[] tfms = args[1].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-            string[] files = args[2].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+            string projectFile = args[1];
+            string[] tfms = args[2].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+            string[] files = args[3].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
 
 
             var microsoftRefs = new[] { "Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives" };

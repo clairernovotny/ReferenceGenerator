@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Look for .nuspec file -->
+
+  <ItemGroup Condition="@(NuSpecLibContent) == '' ">
+    <!-- Default to project output -->
+    <NuSpecLibContent Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup Condition="@(NuSpecFile) == ''">
+    <!-- Look for a nuspec that matches the output name -->
+    <NuSpecFile Include="$(SolutionDir)**\$(TargetName).nuspec" />
+  </ItemGroup>
+  <ItemGroup Condition="@(NuSpecTfms) == ''">
+    <NuSpecTfms Include="dotnet" />
+  </ItemGroup>
+
+
+  <Target Name="UpdateBclNuspecDependencies"
+          AfterTargets="Build"
+          Condition=" @(NuSpecFile) != '' and @(NuSpecTfms) != '' and @(NuSpecLibContent) != '' " >
+
+
+    <!-- Build the command here as quotes are easier this way -->
+    <PropertyGroup>
+      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "@(NuSpecFile)" "$(ProjectDir)$(ProjectFileName)" @(NuSpecTfms) "@(NuSpecLibContent)"</RefGenExecCmd>
+    </PropertyGroup>
+
+
+    <Exec Command="$(RefGenExecCmd)" />
+    <Message Text="Updated Nuspec" />
+
+  </Target>
+</Project>
