@@ -166,7 +166,11 @@ namespace ReferenceGenerator
                 projectJson = JObject.Load(reader);
             }
 
-            var netPlatform = (JObject)projectJson["targets"][".NETPlatform,Version=v5.0"];
+            // Look for the first .NETPlatform entry in the targets
+            var netPlatform = (JObject)((JObject)projectJson["targets"])
+                                    .Properties()
+                                    .First(p => p.Name.StartsWith(".NETPlatform", StringComparison.OrdinalIgnoreCase))
+                                    .Value;
 
             // build a lookup of filenames to packages
             var query = (from package in netPlatform.Properties()
