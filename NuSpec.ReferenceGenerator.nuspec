@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>NuSpec.ReferenceGenerator</id>
+    <version>1.0.0</version>
+    <authors>Oren Novotny</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>nuspec coreclr dnx nuget dependency</tags>
+    <description>Tool to auto-generate BCL package nuspec dependencies for CoreCLR projects</description>
+  </metadata>
+</package>
