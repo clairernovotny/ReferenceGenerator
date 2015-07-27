@@ -43,6 +43,9 @@
     <None Include="SampleClassLibrary.nuspec">
       <SubType>Designer</SubType>
     </None>
+    <None Include="SampleClassLibrary.withns.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
@@ -56,8 +59,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-
-  <Import Project="$(SolutionDir)artifacts\build\dotnet\RefGen.targets" Condition=" Exists('$(SolutionDir)artifacts\build\dotnet\RefGen.targets') "/>
+  <Import Project="$(SolutionDir)artifacts\build\dotnet\RefGen.targets" Condition=" Exists('$(SolutionDir)artifacts\build\dotnet\RefGen.targets') " />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

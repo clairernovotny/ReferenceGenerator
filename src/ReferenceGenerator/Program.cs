@@ -67,11 +67,18 @@ namespace ReferenceGenerator
             // Read nuspec as xml
             using (var reader = XmlReader.Create(path))
             {
-                nsm = new XmlNamespaceManager(reader.NameTable);
-                nsm.AddNamespace("ns", ns.NamespaceName);
+                nsm = new XmlNamespaceManager(reader.NameTable);                
             }
 
             var xdoc = XDocument.Load(path);
+
+            // get the default namespace
+            var name = xdoc.Root.Attribute("xmlns")?.Value ?? string.Empty;
+            nsm.AddNamespace("ns", name);
+
+            ns = name;
+
+
             var deps = GetOrCreateDependenciesNode(xdoc);
 
             foreach (var tfm in tfms)
