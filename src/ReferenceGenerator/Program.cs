@@ -18,16 +18,17 @@ namespace ReferenceGenerator
         static HashSet<string> MicrosoftRefs;
         static int Main(string[] args)
         {
-            // args 0: nuspec file
-            // args 1: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
-            // args 2: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0
-            // args 3: target files, semi-colon joined
+            // args 0: NuGetTargetMoniker -- .NETPlatform,Version=v5.0  
+            // args 1: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0 
+            // args 2: nuspec file
+            // args 3: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
+            // args 4: target files, semi-colon joined
 
-            string nuspecFile = args[0];
-            string[] projectFiles = args[1].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(); 
-            string[] tfms = args[2].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-            string[] files = args[3].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-
+            string nugetTargetMoniker = args[0];
+            string[] tfms = args[1].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+            string nuspecFile = args[2];
+            string[] projectFiles = args[3].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(); 
+            string[] files = args[4].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
 
             var microsoftRefs = new[] { "Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives" };
             MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
@@ -46,7 +47,7 @@ namespace ReferenceGenerator
                     if (File.Exists(Path.Combine(projDir, "project.json")))
                     {
                         // Project.json
-                        var pkgs = GetProjectJsonPackages(projectFiles[i], assm.References);
+                        var pkgs = GetProjectJsonPackages(projectFiles[i], assm.References, nugetTargetMoniker);
                         packages.AddRange(pkgs);
                     }
                     else if (File.Exists(Path.Combine(projDir, $"packages.{Path.GetFileNameWithoutExtension(projectFiles[i])}.config")))
@@ -151,7 +152,7 @@ namespace ReferenceGenerator
             xdoc.Save(nuspecFile, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error
         }
 
-        static IEnumerable<Package> GetProjectJsonPackages(string projectFile, IEnumerable<Reference> refs)
+        static IEnumerable<Package> GetProjectJsonPackages(string projectFile, IEnumerable<Reference> refs, string nugetTargetMoniker)
         {
             // This needs to load the project.lock.json, look for the reference under the 
             // targets -> ".NETPlatform,Version=v5.0", look for each package and the files in it, then pull out based on refs
@@ -170,7 +171,7 @@ namespace ReferenceGenerator
             // Look for the first .NETPlatform entry in the targets
             var netPlatform = (JObject)((JObject)projectJson["targets"])
                                     .Properties()
-                                    .First(p => p.Name.StartsWith(".NETPlatform", StringComparison.OrdinalIgnoreCase))
+                                    .First(p => p.Name.StartsWith(nugetTargetMoniker, StringComparison.OrdinalIgnoreCase))
                                     .Value;
 
             // build a lookup of filenames to packages
@@ -203,7 +204,7 @@ namespace ReferenceGenerator
 
         static IEnumerable<Package> GetPackagesConfigPackages(string projectFile, string packagesConfig, IEnumerable<Reference> assemblyRefs)
         {
-            // For projects that uses packages.config, we need to do two things:
+            // For projects that uses packages.config, we need to do a few things:
             // 1. Read the packages from the config file
             // 2. Read the references from the project file to match files to packages
             // 3. For System packages, we'll have to rely on assembly version -> package version
