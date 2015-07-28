@@ -7,6 +7,9 @@
     <!-- Default to project output -->
     <NuSpecLibContent Include="$(TargetPath)" />
   </ItemGroup>
+  <ItemGroup Condition="@(NuSpecProjectFiles) = ''">
+    <NuSpecProjectFiles Include="$(ProjectDir)$(ProjectFileName)" />
+  </ItemGroup>
   <ItemGroup Condition="@(NuSpecFile) == ''">
     <!-- Look for a nuspec that matches the output name -->
     <NuSpecFile Include="$(SolutionDir)**\$(TargetName).nuspec" />
@@ -23,7 +26,7 @@
 
     <!-- Build the command here as quotes are easier this way -->
     <PropertyGroup>
-      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "@(NuSpecFile)" "$(ProjectDir)$(ProjectFileName)" @(NuSpecTfms) "@(NuSpecLibContent)"</RefGenExecCmd>
+      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "@(NuSpecFile)" "@NuSpecProjectFiles" @(NuSpecTfms) "@(NuSpecLibContent)"</RefGenExecCmd>
     </PropertyGroup>
 
 
