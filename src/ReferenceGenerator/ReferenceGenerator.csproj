@@ -13,6 +13,9 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
+    <StartWorkingDirectory>$(SolutionDir)</StartWorkingDirectory>
+    <StartAction>Project</StartAction>
+    <StartArguments>"tests\SampleClassLibrary\SampleClassLibrary.nuspec"  "tests\SampleClassLibrary\SampleClassLibrary.csproj;tests\SampleCoreLibrary\SampleCoreLibrary.csproj" dotnet "tests\SampleClassLibrary\bin\Debug\SampleClassLibrary.dll;tests\SampleClassLibrary\bin\Debug\SampleCoreLibrary.dll"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
