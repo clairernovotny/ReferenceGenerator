@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -85,10 +86,12 @@ namespace ReferenceGenerator
             else
             {
                 // Must be an "old" PCL without any refs. Best we can do is read the refs
-                packages = GetPackagesFromAssemblyRefs(groups);
+                packages = GetPackagesConfigPackages(projectFile, null, groups);
 
             }
 
+
+            packages = packages.OrderBy(p => p.Id, StringComparer.OrdinalIgnoreCase).ToList();
 
             UpdateNuspecFile(nuspecFile, packages, tfms);
         }
@@ -200,10 +203,103 @@ namespace ReferenceGenerator
             return results;
         }
 
-        static IEnumerable<Package> GetPackagesConfigPackages(string projectFile, string packagesConfig, IEnumerable<Reference> refs)
+        static IEnumerable<Package> GetPackagesConfigPackages(string projectFile, string packagesConfig, IEnumerable<Reference> assemblyRefs)
         {
-            // TODO: impl
-            return GetPackagesFromAssemblyRefs(refs);
+            // For projects that uses packages.config, we need to do two things:
+            // 1. Read the packages from the config file
+            // 2. Read the references from the project file to match files to packages
+            // 3. For System packages, we'll have to rely on assembly version -> package version
+            //    This appears to hold for the System contract assms from within
+            //    C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable
+
+            // To determine if it's a system ref, check the file's existence in the filesystem
+            // Obviously this will only work on Windows
+
+            
+
+            var projDoc = XDocument.Load(projectFile);
+            XNamespace projNs = projDoc.Root.Attribute("xmlns")?.Value ?? string.Empty;
+
+            // get version and profile
+            var profile = projDoc.Descendants(projNs + "TargetFrameworkProfile").FirstOrDefault()?.Value;
+            var version = projDoc.Descendants(projNs + "TargetFrameworkVersion").FirstOrDefault()?.Value;
+            if (string.IsNullOrWhiteSpace(profile) || string.IsNullOrWhiteSpace(version))
+                throw new InvalidOperationException("Only PCLs are supported by this tool. TargetFrameworkProfile or TargetFrameworkVersion is missing");
+
+            // check the version
+            double ver;
+            if (!double.TryParse(version.Substring(1), out ver) || ver < 4.5)
+                throw new InvalidOperationException("Only System.Runtime-based PCL's are supported. Ensure that you're targetting at least Net45, Win8 and wp8");
+
+
+            // build out system refs
+            var sysRefs = (from r in assemblyRefs
+                          where IsFrameworkReference(r.Name, version, profile)
+                          select r)
+                          .ToList();
+
+            var otherRefs = assemblyRefs.Except(sysRefs).ToList();
+
+            // for sys refs, we use the assm ver
+            var packages = new HashSet<Package>(GetPackagesFromAssemblyRefs(sysRefs));
+
+            if(otherRefs.Count > 0)
+            {
+                // Dictionary of package paths to package
+                Dictionary<string, Package> packageMap;
+
+                // if we have a packages.config, parse that into packages
+                if(packagesConfig != null)
+                {
+                    var packagesDoc = XDocument.Load(Path.Combine(Path.GetDirectoryName(projectFile), packagesConfig));
+                    var packagesNs = packagesDoc.Root.Attribute("xmlns")?.Value ?? string.Empty;
+
+                    packageMap = packagesDoc.Descendants(packagesNs + "package")
+                                   .Select(e => new Package(e.Attribute("id").Value, e.Attribute("version").Value))
+                                   .ToDictionary(k => $"{k.Id}.{k.Version}", StringComparer.OrdinalIgnoreCase);
+
+                }
+                else
+                {
+                    packageMap = new Dictionary<string, Package>();
+                }
+
+
+                // get reference nodes
+                // try to get the source package from the hint path
+                var projRefs = (from e in projDoc.Descendants(projNs + "Reference")
+                               let assm = e.Attribute("Include").Value.Split(',')[0]
+                               let hintPath = e.Element(projNs + "HintPath")?.Value
+                               let startIndex = hintPath?.IndexOf("packages\\", StringComparison.OrdinalIgnoreCase) + 9 ?? -1
+                               let endIndex = hintPath?.IndexOf('\\', startIndex) ?? -1
+                               let packageDir = hintPath?.Substring(startIndex, endIndex - startIndex) ?? null
+                               select new { Assembly = assm, PackageDir = packageDir })
+                               .ToList();
+
+
+                // see if we have a package
+                foreach(var projRef in projRefs.Where(pr => pr.PackageDir != null))
+                {
+                    Package p;
+                    if(packageMap.TryGetValue(projRef.PackageDir, out p))
+                    {
+                        packages.Add(p);
+                    }
+                }
+            }
+
+            return packages;
+            
+        }
+
+        static string programFiles = 
+            Environment.Is64BitOperatingSystem? Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) : 
+                                                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        static string portableDir = Path.Combine(programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+        static bool IsFrameworkReference(string assemblyName, string version, string profile)
+        {
+            var filePath = Path.Combine(portableDir, version, "Profile", profile, $"{assemblyName}.dll");
+            return File.Exists(filePath);
         }
 
         static IEnumerable<Package> GetPackagesFromAssemblyRefs(IEnumerable<Reference> refs)
@@ -211,16 +307,6 @@ namespace ReferenceGenerator
             // These should only be system ones
             return refs.Select(r => new Package(r.Name, r.Version.ToString(3)));
         }
-
-        static IEnumerable<Reference> FilterReferences(IEnumerable<Reference> references)
-        {
-            foreach (var r in references)
-            {
-                if (MicrosoftRefs.Contains(r.Name) || r.Name.StartsWith("System.", StringComparison.OrdinalIgnoreCase))
-                    yield return r;
-            }
-        }
-
 
         static XElement GetOrCreateDependenciesNode(XDocument doc, XNamespace nuspecNs)
         {

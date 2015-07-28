@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ReferenceGenerator
 {
-    class Package : IEquatable<Package>
+    class Package : IEquatable<Package>, IComparable<Package>
     {
         public Package(string id, string version)
         {
@@ -25,6 +25,12 @@ namespace ReferenceGenerator
         {
             get;
             private set;
+        }
+
+        public int CompareTo(Package other)
+        {
+            // sort on name for now
+            return StringComparer.OrdinalIgnoreCase.Compare(Id, other?.Id);
         }
 
         public bool Equals(Package other)

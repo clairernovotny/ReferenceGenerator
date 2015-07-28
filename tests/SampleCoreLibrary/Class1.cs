@@ -5,9 +5,11 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
+using Newtonsoft.Json;
 
 namespace SampleCoreLibrary
 {
+    [JsonConverter(null)]
     public class Class1
     {
         XDocument doc;
