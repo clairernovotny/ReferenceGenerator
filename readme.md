@@ -31,11 +31,11 @@ The library files that should be checked for dependencies. Most packages should 
 ```xml
 <ItemGroup>
 	<!-- this project -->
-	<NuSpecProjectFiles Include="$(MSBuildThisFileFullPath)" /> 
+	<NuSpecProjectFile Include="$(MSBuildThisFileFullPath)" /> 
 	
 	<!-- another library we're distributing in the same nupkg -->
 	<!-- Note: Order matters here; use the same order as for NuSpecLibContent --> 
-	<NuSpecProjectFiles Include="$(MSBuildThisFileDirectory)..\AnotherLibrary\AnotherLibrary.csproj" />
+	<NuSpecProjectFile Include="$(SolutionDir)AnotherLibrary\AnotherLibrary.csproj" />
 </ItemGroup>
 ```
 
@@ -53,10 +53,10 @@ By default, the tool will add/update a dependency group for the `dotnet` TFM. In
 ```xml
 <ItemGroup>
 	<!-- dotnet tfm -->
-	<NuSpecTfms Include="dotnet" /> 
+	<NuSpecTfm Include="dotnet" /> 
 	
 	<!-- uap10.0 tfm -->
-	<NuSpecTfms Include="uap10.0" />
+	<NuSpecTfm Include="uap10.0" />
 </ItemGroup>
 ```
 
