@@ -64,6 +64,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reference.cs" />
+    <Compile Include="SemVer\LambdaEqualityComparer.cs" />
+    <Compile Include="SemVer\SemanticVersion.cs" />
+    <Compile Include="SemVer\SemanticVersionBuildMetaData.cs" />
+    <Compile Include="SemVer\SemanticVersionPreReleaseTag.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

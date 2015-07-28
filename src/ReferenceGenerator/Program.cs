@@ -16,15 +16,15 @@ namespace ReferenceGenerator
     class Program
     {
         static HashSet<string> MicrosoftRefs;
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             // args 0: nuspec file
-            // args 1: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references
+            // args 1: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
             // args 2: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0
             // args 3: target files, semi-colon joined
 
             string nuspecFile = args[0];
-            string projectFile = args[1];
+            string[] projectFiles = args[1].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(); 
             string[] tfms = args[2].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
             string[] files = args[3].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
 
@@ -32,68 +32,66 @@ namespace ReferenceGenerator
             var microsoftRefs = new[] { "Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives" };
             MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
 
-            // hashset for storage
-            var references = new HashSet<Reference>();
 
-            foreach (var file in files)
+            var packages = new List<Package>();
+
+            for(var i = 0; i < projectFiles.Length; i++)
             {
                 try
                 {
-                    var assm = AssemblyInfo.GetAssemblyInfo(file);
-                    foreach (var r in assm.References)
+                    var assm = AssemblyInfo.GetAssemblyInfo(files[i]);
+
+
+                    var projDir = Path.GetDirectoryName(projectFiles[i]);
+                    if (File.Exists(Path.Combine(projDir, "project.json")))
                     {
-                        references.Add(r);
+                        // Project.json
+                        var pkgs = GetProjectJsonPackages(projectFiles[i], assm.References);
+                        packages.AddRange(pkgs);
+                    }
+                    else if (File.Exists(Path.Combine(projDir, $"packages.{Path.GetFileNameWithoutExtension(projectFiles[i])}.config")))
+                    {
+                        var pkgs = GetPackagesConfigPackages(projectFiles[i], $"packages.{Path.GetFileNameWithoutExtension(projectFiles[i])}.config", assm.References);
+                        packages.AddRange(pkgs);
+                    }
+                    else if (File.Exists(Path.Combine(projDir, "packages.config")))
+                    {
+                        var pkgs = GetPackagesConfigPackages(projectFiles[i], $"packages.config", assm.References);
+                        packages.AddRange(pkgs);
+                    }
+                    else
+                    {
+                        // Must be an "old" PCL without any refs. Best we can do is read the refs
+                        var pkgs = GetPackagesConfigPackages(projectFiles[i], null, assm.References);
+                        packages.AddRange(pkgs);
                     }
 
                 }
-                catch (InvalidOperationException)
+                catch(Exception e)
                 {
-                    // Log error
-                }
-            }
+                    Console.Write("Error: " + e.Message);
 
+                    return -1;
+                }               
+            }
+       
 
             // Now squash all but most recent
-            var groups = references.GroupBy(k => k.Name, StringComparer.OrdinalIgnoreCase)
+            var groups = packages.GroupBy(k => k.Id, StringComparer.OrdinalIgnoreCase)
                                    .Select(g =>
                                             g.OrderByDescending(r => r.Version)
                                              .First()
                                            )
-                                   .OrderBy(r => r.Name)
+                                   .OrderBy(r => r.Id)
                                    .ToList();
 
-            
             // make sure there is no mscorlib
-            if (groups.Any(g => string.Equals(g.Name, "mscorlib", StringComparison.OrdinalIgnoreCase)))
+            if (groups.Any(g => string.Equals(g.Id, "mscorlib", StringComparison.OrdinalIgnoreCase)))
                 throw new InvalidOperationException("mscorlib-based projects are not supported");
 
-            IEnumerable<Package> packages;
 
-            var projDir = Path.GetDirectoryName(projectFile);
-            if(File.Exists(Path.Combine(projDir, "project.json")))
-            {
-                // Project.json
-                packages = GetProjectJsonPackages(projectFile, groups);
-            }
-            else if(File.Exists(Path.Combine(projDir, $"packages.{Path.GetFileNameWithoutExtension(projectFile)}.config")))
-            {
-                packages = GetPackagesConfigPackages(projectFile, $"packages.{Path.GetFileNameWithoutExtension(projectFile)}.config", groups);
-            }
-            else if(File.Exists(Path.Combine(projDir, "packages.config")))
-            {
-                packages = GetPackagesConfigPackages(projectFile, $"packages.config", groups);
-            }
-            else
-            {
-                // Must be an "old" PCL without any refs. Best we can do is read the refs
-                packages = GetPackagesConfigPackages(projectFile, null, groups);
-
-            }
-
-
-            packages = packages.OrderBy(p => p.Id, StringComparer.OrdinalIgnoreCase).ToList();
-
-            UpdateNuspecFile(nuspecFile, packages, tfms);
+            UpdateNuspecFile(nuspecFile, groups, tfms);
+            return 0;
         }
 
         static void UpdateNuspecFile(string nuspecFile, IEnumerable<Package> packages, IEnumerable<string> tfms)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GitVersion;
 
 namespace ReferenceGenerator
 {
@@ -11,7 +12,7 @@ namespace ReferenceGenerator
         public Package(string id, string version)
         {
             Id = id;
-            Version = version;
+            Version = SemanticVersion.Parse(version, null);
         }
 
         public string Id
@@ -21,11 +22,14 @@ namespace ReferenceGenerator
         }
 
         // This needs a SemVer comparer
-        public string Version
+        public SemanticVersion Version
         {
             get;
             private set;
         }
+
+        public string VersionString => Version.ToString("lp");
+            
 
         public int CompareTo(Package other)
         {
