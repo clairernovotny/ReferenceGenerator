@@ -19,14 +19,14 @@
   </ItemGroup>
 
 
-  <Target Name="UpdateBclNuspecDependencies"
+  <Target Name="UpdateNuspecDependencies"
           AfterTargets="Build"
           Condition=" @(NuSpecFile) != '' and @(NuSpecTfms) != '' and @(NuSpecLibContent) != '' " >
 
 
     <!-- Build the command here as quotes are easier this way -->
     <PropertyGroup>
-      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "@(NuSpecFile)" "@NuSpecProjectFiles" @(NuSpecTfms) "@(NuSpecLibContent)"</RefGenExecCmd>
+      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "@(NuSpecFile)" "@(NuSpecProjectFiles)" @(NuSpecTfms) "@(NuSpecLibContent)"</RefGenExecCmd>
     </PropertyGroup>
 
 

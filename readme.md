@@ -5,20 +5,17 @@ Package authoring for .NET Core based libraries (ASPNet 5, DNX, UWP) has an extr
 This tool aims to help by reading your compiled libraries assembly metadata and determine what that list should be. It currently supports any `System.Runtime` based project, including "Profile 259"+ PCL's -- that is, a PCL that targets at least .NET 4.5, Windows 8 and Windows Phone 8.
 
 ## Usage
-This tool uses some conventions to locate your `nuspec` file and input libraries. These can be overrriden in your project file. The tool looks for a `.nuspec` file with the same name as your target library underneath the solution root directory. By default, it will add/update a `<dependencies>` group for the `dotnet` TFM, but you can have it generate others by overriding your project file value.
+This tool uses some conventions to locate your `nuspec` file and input libraries. These can be overridden in your project file. The tool looks for a `.nuspec` file with the same name as your target library underneath the solution root directory. By default, it will add/update a `<dependencies>` group for the `dotnet` TFM, but you can have it generate others by overriding your project file value.
 
-Using NuGet, add `NuSpec.ReferenceGenerator` to your library project. On build, it will add/update your nuspec with the correct dependency data for the BCL libraries.
+Using NuGet, add `NuSpec.ReferenceGenerator` to your library project. On build, it will add/update your nuspec with the correct dependency data for your libraries.
 
 ## Limitations
-- In this first version, only System dependencies are generated. If you depend on other packages, you still need to add them to your nuspec. This tool will ignore those. 
-- Dependencies are determined by using the assembly name and version as the package id and version. This may generate a package like System.Net.Request 3.9, a non-existent package. The NuGet resolution rules will pull down the 4.0 version, which is the correct version.
-
-The next version of this tool will aim to address both of these limitations by directly parsing the VS project file and project.lock.json files to determine the package versions directly.
+- This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
 
 ## Options and overriding default behavior
 
 **NuSpec Library Content** 
-The library files that should be checked for dependencies. Most packages should have a single assembly which the tool will detect. If you have more than one file packaged in your nupkg, then you need to to specify the following in your csproj/vbproj file:
+The library files that should be checked for dependencies. Most packages should have a single assembly which the tool will detect. If you have more than one file packaged in your nupkg, then you need to to specify the following in your csproj/vbproj file. You'll also need to specify the project file for it in the next section:
 ```xml
 <ItemGroup>
 	<!-- output of this project -->
@@ -26,6 +23,19 @@ The library files that should be checked for dependencies. Most packages should 
 	
 	<!-- another library we're distributing in the same nupkg -->
 	<NuSpecLibContent Include="$(TargetDir)AnotherLibrary.dll" />
+</ItemGroup>
+```
+
+**NuSpec Project Files** 
+The library files that should be checked for dependencies. Most packages should have a single assembly which the tool will detect. If you have more than one file packaged in your nupkg, then you need to to specify the following in your csproj/vbproj file:
+```xml
+<ItemGroup>
+	<!-- this project -->
+	<NuSpecProjectFiles Include="$(MSBuildThisFileFullPath)" /> 
+	
+	<!-- another library we're distributing in the same nupkg -->
+	<!-- Note: Order matters here; use the same order as for NuSpecLibContent --> 
+	<NuSpecProjectFiles Include="$(MSBuildThisFileDirectory)..\AnotherLibrary\AnotherLibrary.csproj" />
 </ItemGroup>
 ```
 
