@@ -16,7 +16,8 @@ namespace ReferenceGenerator
     class Program
     {
         static HashSet<string> MicrosoftRefs;
-        static int Main(string[] args)
+
+        private static int Main(string[] args)
         {
             // args 0: NuGetTargetMoniker -- .NETPlatform,Version=v5.0  
             // args 1: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0 
@@ -24,22 +25,29 @@ namespace ReferenceGenerator
             // args 3: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
             // args 4: target files, semi-colon joined
 
-            string nugetTargetMoniker = args[0];
-            string[] tfms = args[1].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-            string nuspecFile = args[2];
-            string[] projectFiles = args[3].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(); 
-            string[] files = args[4].Split(';').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-
-            var microsoftRefs = new[] { "Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives" };
-            MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
-
-
-            var packages = new List<Package>();
-
-            for(var i = 0; i < projectFiles.Length; i++)
+            try
             {
-                try
+                string nugetTargetMoniker = args[0];
+                string[] tfms = args[1].Split(';')
+                                       .Where(s => !string.IsNullOrWhiteSpace(s))
+                                       .ToArray();
+                string nuspecFile = args[2];
+                string[] projectFiles = args[3].Split(';')
+                                               .Where(s => !string.IsNullOrWhiteSpace(s))
+                                               .ToArray();
+                string[] files = args[4].Split(';')
+                                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                                        .ToArray();
+
+                var microsoftRefs = new[] {"Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives"};
+                MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
+
+
+                var packages = new List<Package>();
+
+                for (var i = 0; i < projectFiles.Length; i++)
                 {
+
                     var assm = AssemblyInfo.GetAssemblyInfo(files[i]);
 
 
@@ -66,33 +74,32 @@ namespace ReferenceGenerator
                         var pkgs = GetPackagesConfigPackages(projectFiles[i], null, assm.References);
                         packages.AddRange(pkgs);
                     }
-
                 }
-                catch(Exception e)
-                {
-                    Console.Write("Error: " + e.Message);
 
-                    return -1;
-                }               
+
+                // Now squash all but most recent
+                var groups = packages.GroupBy(k => k.Id, StringComparer.OrdinalIgnoreCase)
+                                     .Select(g =>
+                                             g.OrderByDescending(r => r.Version)
+                                              .First()
+                    )
+                                     .OrderBy(r => r.Id)
+                                     .ToList();
+
+                // make sure there is no mscorlib
+                if (groups.Any(g => string.Equals(g.Id, "mscorlib", StringComparison.OrdinalIgnoreCase)))
+                    throw new InvalidOperationException("mscorlib-based projects are not supported");
+
+
+                UpdateNuspecFile(nuspecFile, groups, tfms);
+                return 0;
             }
-       
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(new ErrorWithMessage(e));
 
-            // Now squash all but most recent
-            var groups = packages.GroupBy(k => k.Id, StringComparer.OrdinalIgnoreCase)
-                                   .Select(g =>
-                                            g.OrderByDescending(r => r.Version)
-                                             .First()
-                                           )
-                                   .OrderBy(r => r.Id)
-                                   .ToList();
-
-            // make sure there is no mscorlib
-            if (groups.Any(g => string.Equals(g.Id, "mscorlib", StringComparison.OrdinalIgnoreCase)))
-                throw new InvalidOperationException("mscorlib-based projects are not supported");
-
-
-            UpdateNuspecFile(nuspecFile, groups, tfms);
-            return 0;
+                return -1;
+            }
         }
 
         static void UpdateNuspecFile(string nuspecFile, IEnumerable<Package> packages, IEnumerable<string> tfms)
