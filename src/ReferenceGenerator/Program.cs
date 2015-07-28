@@ -254,7 +254,7 @@ namespace ReferenceGenerator
 
                     packageMap = packagesDoc.Descendants(packagesNs + "package")
                                    .Select(e => new Package(e.Attribute("id").Value, e.Attribute("version").Value))
-                                   .ToDictionary(k => $"{k.Id}.{k.Version}", StringComparer.OrdinalIgnoreCase);
+                                   .ToDictionary(k => $"{k.Id}.{k.VersionString}", StringComparer.OrdinalIgnoreCase);
 
                 }
                 else
@@ -327,7 +327,7 @@ namespace ReferenceGenerator
                 refs.Select(r =>
                     new XElement(nuspecNs + "dependency",
                         new XAttribute("id", r.Id),
-                        new XAttribute("version", r.Version)
+                        new XAttribute("version", r.VersionString)
                                 )));
 
             return ele;

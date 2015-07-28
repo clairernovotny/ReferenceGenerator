@@ -13,6 +13,7 @@ namespace ReferenceGenerator
         {
             Id = id;
             Version = SemanticVersion.Parse(version, null);
+            VersionString = version;
         }
 
         public string Id
@@ -21,14 +22,18 @@ namespace ReferenceGenerator
             private set;
         }
 
-        // This needs a SemVer comparer
+        // This needs a SemVer comparer for sorting
         public SemanticVersion Version
         {
             get;
             private set;
         }
 
-        public string VersionString => Version.ToString("lp");
+        // we use the string for round-tripping
+        public string VersionString
+        {
+            get; private set;
+        }
             
 
         public int CompareTo(Package other)
@@ -58,7 +63,7 @@ namespace ReferenceGenerator
 
         public override string ToString()
         {
-            return Id + ", " + Version;
+            return Id + ", " + VersionString;
         }
     }
 }
