@@ -11,11 +11,10 @@ Using NuGet, add `NuSpec.ReferenceGenerator` to your library project. On build, 
 
 If you have existing package dependencies in your nuspec in the group that aren't picked up by this tool, they'll be silently ignored. This could happen in the case where a HintPath to a Package is missing and the package could not be detected. 
 
+When you author your nuspec package, make sure that your library goes into the `\lib\dotnet` directory.
+
 ## Limitations
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
-
-- **DNX Core** The DNX Core uses the OSS .NET Core libraries, which are still in beta. The [roadmap](https://github.com/aspnet/Home/wiki/Roadmap) has the release in Q1 2016. Until then, packages that that want to target DNX Core need to add an extra dependencies section that targets their beta packages. No changes are required to your library, just your nuspec. Any Profile259+/System.Runtime PCL can run on DNX, you do NOT have to create a kproj and compile specially for it. This tool will generate a dnxcore5 dependency group by default by guessing the BCL libraries as there's no foolproof way to detect them by looking at assembly references. (The package is in beta, the assembly ref has a version).
-
 
 ## Options and overriding default behavior
 
@@ -64,14 +63,6 @@ By default, the tool will add/update a dependency group for the `dotnet` TFM. In
 	<NuSpecTfm Include="uap10.0" />
 </ItemGroup>
 ```
-**DNXCore 5**
-To overcome the current limitation where DNX needs to use its -beta-tagged BCL libraries, by default this tool will emit its best guess of which assemblies are -beta and mark them accordingly. This is a HACK as the tool is assuming that System.* libs are -beta (along with a couple select Microsoft ones). If you wish to disable the generation of the dnxcore5 section due to bad guessing, set the following properties in your project. Also, you can control the prerelease tag used so you can match DNX updates by setting `NuSpecDnxCoreTag` property.
-```xml
-<PropertyGroup>
-	<NuSpecIncludeDnxCore>False</NuSpecIncludeDnxCore>
-	<NuSpecDnxCoreTag>-beta-23109</NuSpecDnxCoreTag>
-</PropertyGroup>
-```
 
 ## Command line
 This tool is a command line that you can call in other ways. The parameters are as follows and they are all required:
@@ -82,8 +73,6 @@ This tool is a command line that you can call in other ways. The parameters are 
 // args 2: nuspec file, full path
 // args 3: project file (csproj/vbproj, etc) full path. Used to look for packages.config/project.json and references. should match order of target files
 // args 4: target files, semi-colon joined, full path
-// args 5: generate dnxcore5 workaround: True/False
-// args 6: dnx core beta tag: -beta-23109
 ```
 
 ## Support

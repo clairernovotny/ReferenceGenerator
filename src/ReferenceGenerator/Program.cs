@@ -24,8 +24,6 @@ namespace ReferenceGenerator
             // args 2: nuspec file
             // args 3: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
             // args 4: target files, semi-colon joined
-            // args 5: generate dnxcore5 workaround
-            // args 6: dnx core beta tag
 
             try
             {
@@ -40,9 +38,7 @@ namespace ReferenceGenerator
                 var files = args[4].Split(';')
                                         .Where(s => !string.IsNullOrWhiteSpace(s))
                                         .ToArray();
-
-                var dnxCoreGen = bool.Parse(args[5]);
-                var dnxBetaTag = args[6];
+       
 
                 var microsoftRefs = new[] {"Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives"};
                 MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
@@ -96,7 +92,7 @@ namespace ReferenceGenerator
                     throw new InvalidOperationException("mscorlib-based projects are not supported");
 
 
-                UpdateNuspecFile(nuspecFile, groups, tfms, dnxCoreGen, dnxBetaTag);
+                UpdateNuspecFile(nuspecFile, groups, tfms);
                 return 0;
             }
             catch (Exception e)
@@ -107,7 +103,7 @@ namespace ReferenceGenerator
             }
         }
 
-        static void UpdateNuspecFile(string nuspecFile, IEnumerable<Package> packages, IEnumerable<string> tfms, bool dnxCoreGen, string betaTag)
+        static void UpdateNuspecFile(string nuspecFile, IEnumerable<Package> packages, IEnumerable<string> tfms)
         {
 
             var refNames = new HashSet<string>(packages.Select(g => g.Id), StringComparer.OrdinalIgnoreCase);
@@ -130,13 +126,10 @@ namespace ReferenceGenerator
             
 
             var deps = GetOrCreateDependenciesNode(xdoc, nuspecNs);
-
-            if (dnxCoreGen)
-                tfms = tfms.Concat(new[] {"dnxcore5"});
-
+            
             foreach (var tfm in tfms)
             {
-                var ele = CreateDependencyElement(tfm, packages, nuspecNs, betaTag);
+                var ele = CreateDependencyElement(tfm, packages, nuspecNs);
 
                 // see if we have a node with this tfm
                 var grp = deps.XPathSelectElement($"./ns:group[@targetFramework='{tfm}']", nsm);
@@ -337,24 +330,16 @@ namespace ReferenceGenerator
             return deps;
         }
 
-        static XElement CreateDependencyElement(string tfm, IEnumerable<Package> refs, XNamespace nuspecNs, string betaTag)
+        static XElement CreateDependencyElement(string tfm, IEnumerable<Package> refs, XNamespace nuspecNs)
         {
             var ele = new XElement(nuspecNs + "group", new XAttribute("targetFramework", tfm),
                 refs.Select(r =>
                     new XElement(nuspecNs + "dependency",
                         new XAttribute("id", r.Id),
-                        new XAttribute("version", $"{r.VersionString}{(string.Equals("dnxcore5", tfm, StringComparison.OrdinalIgnoreCase) ? (IsSystemReference(r) ? betaTag : string.Empty) : string.Empty)}")
+                        new XAttribute("version", $"{r.VersionString}")
                                 )));
 
             return ele;
         }
-
-        private static bool IsSystemReference(Package r)
-        {
-            return MicrosoftRefs.Contains(r.Id) || r.Id.StartsWith("System.", StringComparison.OrdinalIgnoreCase);
-                  
-            
-        }
-
     }
 }
