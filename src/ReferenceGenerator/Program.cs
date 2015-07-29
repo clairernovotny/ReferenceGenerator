@@ -27,15 +27,15 @@ namespace ReferenceGenerator
 
             try
             {
-                string nugetTargetMoniker = args[0];
-                string[] tfms = args[1].Split(';')
+                var nugetTargetMoniker = args[0];
+                var tfms = args[1].Split(';')
                                        .Where(s => !string.IsNullOrWhiteSpace(s))
                                        .ToArray();
-                string nuspecFile = args[2];
-                string[] projectFiles = args[3].Split(';')
+                var nuspecFile = args[2];
+                var projectFiles = args[3].Split(';')
                                                .Where(s => !string.IsNullOrWhiteSpace(s))
                                                .ToArray();
-                string[] files = args[4].Split(';')
+                var files = args[4].Split(';')
                                         .Where(s => !string.IsNullOrWhiteSpace(s))
                                         .ToArray();
 
@@ -122,7 +122,7 @@ namespace ReferenceGenerator
             nsm.AddNamespace("ns", name);
 
             XNamespace nuspecNs = name;
-
+            
 
             var deps = GetOrCreateDependenciesNode(xdoc, nuspecNs);
 
@@ -298,13 +298,13 @@ namespace ReferenceGenerator
             
         }
 
-        static string programFiles = 
+        static readonly string ProgramFiles = 
             Environment.Is64BitOperatingSystem? Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) : 
                                                 Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-        static string portableDir = Path.Combine(programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+        static readonly string PortableDir = Path.Combine(ProgramFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
         static bool IsFrameworkReference(string assemblyName, string version, string profile)
         {
-            var filePath = Path.Combine(portableDir, version, "Profile", profile, $"{assemblyName}.dll");
+            var filePath = Path.Combine(PortableDir, version, "Profile", profile, $"{assemblyName}.dll");
             return File.Exists(filePath);
         }
 

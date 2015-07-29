@@ -41,14 +41,14 @@ namespace ReferenceGenerator
 
         public static AssemblyInfo GetAssemblyInfo(string path)
         {
-            using (PEReader peReader = new PEReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
+            using (var peReader = new PEReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
             {
-                MetadataReader contractReader = peReader.GetMetadataReader();
-                AssemblyDefinition assembly = contractReader.GetAssemblyDefinition();
+                var contractReader = peReader.GetMetadataReader();
+                var assembly = contractReader.GetAssemblyDefinition();
 
-                string name = contractReader.GetString(assembly.Name);
-                Version version = assembly.Version;
-                Reference[] references = GetAssemblyReferences(contractReader);
+                var name = contractReader.GetString(assembly.Name);
+                var version = assembly.Version;
+                var references = GetAssemblyReferences(contractReader);
 
                 return new AssemblyInfo(path, name, version, references);
             }
@@ -56,11 +56,11 @@ namespace ReferenceGenerator
 
         private static Reference[] GetAssemblyReferences(MetadataReader reader)
         {
-            List<Reference> references = new List<Reference>();
+            var references = new List<Reference>();
 
             foreach (var handle in reader.AssemblyReferences)
             {
-                AssemblyReference reference = reader.GetAssemblyReference(handle);
+                var reference = reader.GetAssemblyReference(handle);
                 references.Add(new Reference(reader.GetString(reference.Name), reference.Version));
             }
 
