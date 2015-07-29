@@ -17,6 +17,16 @@
         <dependency id="System.Runtime" version="4.0.20" />
         <dependency id="System.Xml.XDocument" version="4.0.10" />
       </group>
+      <group targetFramework="dnxcore5">
+        <dependency id="Newtonsoft.Json" version="7.0.1" />
+        <dependency id="System.Net.Requests" version="3.9.0-beta-23109" />
+        <dependency id="System.Reflection" version="4.0.10-beta-23109" />
+        <dependency id="System.Reflection.Extensions" version="4.0.0-beta-23109" />
+        <dependency id="System.Reflection.TypeExtensions" version="4.0.0-beta-23109" />
+        <dependency id="System.Resources.ResourceManager" version="4.0.0-beta-23109" />
+        <dependency id="System.Runtime" version="4.0.20-beta-23109" />
+        <dependency id="System.Xml.XDocument" version="4.0.10-beta-23109" />
+      </group>
     </dependencies>
   </metadata>
 </package>
