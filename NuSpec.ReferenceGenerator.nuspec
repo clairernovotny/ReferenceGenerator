@@ -3,6 +3,7 @@
   <metadata>
     <id>NuSpec.ReferenceGenerator</id>
     <version>1.0.1</version>
+    <title>NuSpec Dependency Generator</title>
     <authors>Oren Novotny</authors>
     <licenseUrl>https://raw.githubusercontent.com/onovotny/ReferenceGenerator/master/LICENSE.txt</licenseUrl>
     <projectUrl>https://github.com/onovotny/ReferenceGenerator</projectUrl>
