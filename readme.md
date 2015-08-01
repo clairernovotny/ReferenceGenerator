@@ -48,7 +48,7 @@ By default, the tool will look for a .nuspec file with the same name as your lib
 ```xml
 <ItemGroup>
 	<!-- example NuSpec file that must be specified -->
-	<NuSpecLibContent Include="$(SolutionDir)package\.nuspec" /> 
+	<NuSpecFile Include="$(SolutionDir)package\.nuspec" /> 
 </ItemGroup>
 ```
 
