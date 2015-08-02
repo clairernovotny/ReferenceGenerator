@@ -13,9 +13,6 @@ If you have existing package dependencies in your nuspec in the group that aren'
 
 When you author your nuspec package, make sure that your library goes into the `\lib\dotnet` directory.
 
-## Limitations
-- This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
-
 ## Packages containing both `dotnet` and pre-.NET 4.6 libraries
 If you have a package that contains a `dotnet` group and targets both new and old platforms, you might need an extra step in your nuspec. This depends on what packages you actually reference in your dotnet section. You need to make sure to add some or all of the following:
 ```xml
@@ -39,8 +36,7 @@ Every library is different in its needs, but here's some guidance:
 
 - If your `dotnet` version is a "modern PCL" and true .NET Core, then it will only run on > `net46`, `uap10.0` and `dnx*`. If you target older platforms, then you'll need to add those empty dependency groups to prevent your `dotnet` group - which is required for proper resolution on those newer platforms - from being used by the older platforms.
 - If you have a `portable-win8+net45+wp8+wpa81` library, also known as `Profile 259`, and you put a copy of that in your `dotnet` folder and use those dependencies, then any older platform would need to be blocked.
-- Overall, you need to block any older platform than what you have in your `dotnet` folder/dependency group. 
- 
+- Overall, you need to block any older platform than what you have in your `dotnet` folder/dependency group.
 
 ## Options and overriding default behavior
 
@@ -100,6 +96,9 @@ This tool is a command line that you can call in other ways. The parameters are 
 // args 3: project file (csproj/vbproj, etc) full path. Used to look for packages.config/project.json and references. should match order of target files
 // args 4: target files, semi-colon joined, full path
 ```
+
+## Limitations
+- This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
 
 ## Support
 If you find any issues, please open an issue in the tracker and/or ping me ([@onovotny](https://twitter.com/onovotny)) on Twitter and I'll try to help.
