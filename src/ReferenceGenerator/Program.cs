@@ -84,7 +84,7 @@ namespace ReferenceGenerator
                                              g.OrderByDescending(r => r.Version)
                                               .First()
                     )
-                                     .OrderBy(r => r.Id)
+                                     .OrderBy(r => r.Id, StringComparer.OrdinalIgnoreCase)
                                      .ToList();
 
                 // make sure there is no mscorlib
@@ -103,7 +103,7 @@ namespace ReferenceGenerator
             }
         }
 
-        static void UpdateNuspecFile(string nuspecFile, IEnumerable<Package> packages, IEnumerable<string> tfms)
+        static void UpdateNuspecFile(string nuspecFile, IReadOnlyList<Package> packages, IEnumerable<string> tfms)
         {
 
             var refNames = new HashSet<string>(packages.Select(g => g.Id), StringComparer.OrdinalIgnoreCase);
@@ -137,7 +137,9 @@ namespace ReferenceGenerator
                 {
                     // Need to merge
                     // find nodes that match by name, remove and then readd them
-                    var existing = grp.Elements(nuspecNs + "dependency")?.Where(e => refNames.Contains(e.Attribute("id").Value))?.ToList() ?? new List<XElement>();
+                    var existing = grp.Elements(nuspecNs + "dependency")
+                                      .Where(e => refNames.Contains(e.Attribute("id").Value))
+                                      .ToList();
 
                     foreach (var xe in existing)
                     {
