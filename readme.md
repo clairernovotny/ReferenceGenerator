@@ -13,10 +13,10 @@ If you have existing package dependencies in your nuspec in the group that aren'
 
 When you author your nuspec package, make sure that your library goes into the `\lib\dotnet` directory.
 
-## Packages containing both `dotnet` and pre-.NET 4.6 libraries
-If you have a package that contains a `dotnet` group and targets both new and old platforms, you might need an extra step in your nuspec. This depends on what packages you actually reference in your dotnet section. You need to make sure to add some or all of the following:
+## Packages containing `dotnet` and existing libraries
+If you have a package that contains a `dotnet` group and targets both new and old platforms, you might need an extra step in your nuspec. This depends on what packages you actually reference in your dotnet section. You might need to add some or all of the following:
 ```xml
-<group targetFramework="net4" />
+<group targetFramework="net45" />
 <group targetFramework="wp8" />
 <group targetFramework="win8" />
 <group targetFramework="wpa81" />
@@ -24,19 +24,15 @@ If you have a package that contains a `dotnet` group and targets both new and ol
 <group targetFramework="monotouch" />
 <group targetFramework="monoandroid" />
 ```
-Depending on the minimum platform versions you target and the minimum platforms supported by your `dotnet` dependencies.
+Depending on the minimum platform versions you target and the minimum platforms supported by your `dotnet` dependencies. NuGet will evaluate `dotnet` for any "System.Runtime" based platform, so that effectively means, `net45`, `wp8`, `win8`, `wpa81`, `xamarin.ios`, `monotouch`, and `monoandroid`. Those platforms support System.Runtime 4.0.0. If you target a newer set of platforms, like `net451`, `Win81` and `wpa81` (Profile 151), then it's System.Runtime is 4.0.10.
 
-For example, if you're putting a Profile 259 library in `dotnet`, then all of your contracts are 4.0.0 and will run on .NET 4.5 and higher. If you have a .NET 3.5 and .NET 4 version in your package too, then you should add
+For example, if you're putting a Profile 151 library in `dotnet`, then your System.Runtime is 4.0.10 and will run on .NET 4.5.1 and higher. For older platforms like .NET 4.5, you'll need to add a blank group 
 ```xml
-<group targetFramework="net35" />
+<group targetFramework="net45" />
 ```
 to ensure that those older platforms don't try to add references to the newer dependencies specified in your `dotnet` section.
 
-Every library is different in its needs, but here's some guidance:
-
-- If your `dotnet` version is a "modern PCL" and true .NET Core, then it will only run on >= `net46`, `uap10.0` and `dnx*`. If you target older platforms, then you'll need to add those empty dependency groups to prevent your `dotnet` group - which is required for proper resolution on those newer platforms - from being used by the older platforms.
-- If you have a `portable-win8+net45+wp8+wpa81` library, also known as `Profile 259`, and you put a copy of that in your `dotnet` folder and use those dependencies, then any older platform would need to be blocked.
-- Overall, you need to block any older platform than what you have in your `dotnet` folder/dependency group.
+To sum this up, look at the output of the tool for the `dotnet` section. If you have a System.Runtime higher than 4.0.0, and you want to to target `net45`, `wp8`, `win8`,  `xamarin.ios`, `monotouch`, or `monoandroid`, then you need to block the `dotnet` dependency group by adding blank dependency groups for the other platforms.
 
 ## Options and overriding default behavior
 
