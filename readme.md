@@ -104,7 +104,7 @@ This tool is a command line that you can call in other ways. The parameters are 
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
 
 ## Changelog
-- 1.1: Prevent included items (nuspec, project files, libraries) from showing up in Visual Studio. Changed NuSpecTfm to a `PropertyGroup` from an `ItemGroup`.
+- 1.2: Prevent included items (nuspec, project files, libraries) from showing up in Visual Studio. Changed NuSpecTfm to a `PropertyGroup` from an `ItemGroup`.
     - If you were setting `NuSpecTfm` you'll need to update your settings to use `PropertyGroup` for that item.
 - 1.0.1: Add `Portable-` to ensure the package works for `packages.config` based projects.
 - 1.0: Initial Release
