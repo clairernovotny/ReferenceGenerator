@@ -5,14 +5,20 @@
 
   <ItemGroup Condition="@(NuSpecLibContent) == '' ">
     <!-- Default to project output -->
-    <NuSpecLibContent Include="$(TargetPath)" />
+    <NuSpecLibContent Include="$(TargetPath)">
+      <Visible>False</Visible>
+    </NuSpecLibContent>
   </ItemGroup>
   <ItemGroup Condition="@(NuSpecProjectFile) == ''">
-    <NuSpecProjectFile Include="$(ProjectDir)$(ProjectFileName)" />
+    <NuSpecProjectFile Include="$(ProjectDir)$(ProjectFileName)">
+      <Visible>False</Visible>
+    </NuSpecProjectFile>
   </ItemGroup>
   <ItemGroup Condition="@(NuSpecFile) == ''">
     <!-- Look for a nuspec that matches the output name -->
-    <NuSpecFile Include="$(SolutionDir)**\$(TargetName).nuspec" />
+    <NuSpecFile Include="$(SolutionDir)**\$(TargetName).nuspec">
+      <Visible>False</Visible>
+    </NuSpecFile>
   </ItemGroup>
   <ItemGroup Condition="@(NuSpecTfm) == ''">
     <NuSpecTfm Include="dotnet" />
