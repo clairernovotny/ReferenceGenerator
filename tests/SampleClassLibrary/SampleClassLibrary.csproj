@@ -35,8 +35,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <NuSpecLibContent Include="$(TargetPath)" />
-    <NuSpecLibContent Include="$(TargetDir)SampleCoreLibrary.dll" />
+    <NuSpecLibContent Include="$(TargetPath)">
+      <Visible>False</Visible>
+    </NuSpecLibContent>
+    <NuSpecLibContent Include="$(TargetDir)SampleCoreLibrary.dll">
+      <Visible>False</Visible>
+    </NuSpecLibContent>
+    <NuSpecProjectFile Include="$(MSBuildProjectFile)">
+      <Visible>False</Visible>
+    </NuSpecProjectFile>
+    <NuSpecProjectFile Include="$(SolutionDir)tests\SampleCoreLibrary\SampleCoreLibrary.csproj">
+      <Visible>False</Visible>
+    </NuSpecProjectFile>
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
