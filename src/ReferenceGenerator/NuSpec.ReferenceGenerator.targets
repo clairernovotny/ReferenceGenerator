@@ -20,18 +20,18 @@
       <Visible>False</Visible>
     </NuSpecFile>
   </ItemGroup>
-  <ItemGroup Condition="@(NuSpecTfm) == ''">
-    <NuSpecTfm Include="dotnet" />
-  </ItemGroup>
+  <PropertyGroup Condition="$(NuSpecTfm) == ''">
+    <NuSpecTfm>dotnet</NuSpecTfm>
+  </PropertyGroup>
 
   <Target Name="UpdateNuspecDependencies"
           AfterTargets="Build"
-          Condition=" @(NuSpecFile) != '' and @(NuSpecTfm) != '' and @(NuSpecLibContent) != '' and @(NuSpecProjectFile) != ''" >
+          Condition=" @(NuSpecFile) != '' and $(NuSpecTfm) != '' and @(NuSpecLibContent) != '' and @(NuSpecProjectFile) != ''" >
 
 
     <!-- Build the command here as quotes are easier this way -->
     <PropertyGroup>
-      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "$(NuGetTargetMoniker)" @(NuSpecTfm) "@(NuSpecFile)" "@(NuSpecProjectFile)" "@(NuSpecLibContent)"</RefGenExecCmd>
+      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "$(NuGetTargetMoniker)" $(NuSpecTfm) "@(NuSpecFile)" "@(NuSpecProjectFile)" "@(NuSpecLibContent)"</RefGenExecCmd>
     </PropertyGroup>
 
 

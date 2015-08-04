@@ -71,15 +71,12 @@ By default, the tool will look for a .nuspec file with the same name as your lib
 ```
 
 **Target Frameworks**
-By default, the tool will add/update a dependency group for the `dotnet` TFM. In some cases, you may need to also include another one like `uap10.0`. An example of this is if your package includes a `win8` or `win81` library but you'd like the .NET Core-based one to be used there. `dotnet` isn't enough as `win81` is more specific and would "win." Instead, just copy your `dotnet` library to also be under `\lib\uap10.0` and specify an additional TFM for the tool to add/update.
+By default, the tool will add/update a dependency group for the `dotnet` TFM. In some cases, you may need to also include another one like `uap10.0`. An example of this is if your package includes a `win8` or `win81` library but you'd like the .NET Core-based one to be used there. `dotnet` isn't enough as `win81` is more specific and would "win." Instead, just copy your `dotnet` library to also be under `\lib\uap10.0` and specify an additional TFM for the tool to add/update. This should be a semi-colon joined list.
 ```xml
-<ItemGroup>
-	<!-- dotnet tfm -->
-	<NuSpecTfm Include="dotnet" /> 
-	
-	<!-- uap10.0 tfm -->
-	<NuSpecTfm Include="uap10.0" />
-</ItemGroup>
+<PropertyGroup>
+	<!-- dotnet and uap10.0 tfms -->
+	<NuSpecTfm>dotnet;uap10.0</NuSpecTfm>
+</PropertyGroup>
 ```
 
 ## Command line
@@ -95,6 +92,12 @@ This tool is a command line that you can call in other ways. The parameters are 
 
 ## Limitations
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
+
+## Changelog
+- 1.1: Prevent included items (nuspec, project files, libraries) from showing up in Visual Studio. Changed NuSpecTfm to a `PropertyGroup` from an `ItemGroup`.
+    - If you were setting `NuSpecTfm` you'll need to update your settings to use `PropertyGroup` for that item.
+- 1.0.1: Add `Portable-` to ensure the package works for `packages.config` based projects.
+- 1.0: Initial Release
 
 ## Support
 If you find any issues, please open an issue in the tracker and/or ping me ([@onovotny](https://twitter.com/onovotny)) on Twitter and I'll try to help.
