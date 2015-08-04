@@ -41,10 +41,14 @@ The library files that should be checked for dependencies. Most packages should 
 ```xml
 <ItemGroup>
 	<!-- output of this project -->
-	<NuSpecLibContent Include="$(TargetPath)" /> 
+	<NuSpecLibContent Include="$(TargetPath)">
+        <Visible>False</Visible>
+    </NuSpecLibContent>
 	
 	<!-- another library we're distributing in the same nupkg -->
-	<NuSpecLibContent Include="$(TargetDir)AnotherLibrary.dll" />
+	<NuSpecLibContent Include="$(TargetDir)AnotherLibrary.dll">
+        <Visible>False</Visible>
+    </NuSpecLibContent>
 </ItemGroup>
 ```
 
@@ -53,11 +57,15 @@ The library files that should be checked for dependencies. Most packages should 
 ```xml
 <ItemGroup>
 	<!-- this project -->
-	<NuSpecProjectFile Include="$(MSBuildThisFileFullPath)" /> 
+	<NuSpecProjectFile Include="$(MSBuildThisFileFullPath)">
+        <Visible>False</Visible>
+    </NuSpecProjectFile> 
 	
 	<!-- another library we're distributing in the same nupkg -->
 	<!-- Note: Order matters here; use the same order as for NuSpecLibContent --> 
-	<NuSpecProjectFile Include="$(SolutionDir)AnotherLibrary\AnotherLibrary.csproj" />
+	<NuSpecProjectFile Include="$(SolutionDir)AnotherLibrary\AnotherLibrary.csproj">
+        <Visible>False</Visible>
+    </NuSpecProjectFile> 
 </ItemGroup>
 ```
 
@@ -66,7 +74,9 @@ By default, the tool will look for a .nuspec file with the same name as your lib
 ```xml
 <ItemGroup>
 	<!-- example NuSpec file that must be specified -->
-	<NuSpecFile Include="$(SolutionDir)package\.nuspec" /> 
+	<NuSpecFile Include="$(SolutionDir)package\.nuspec">
+        <Visible>False</Visible>
+    </NuSpecFile> 
 </ItemGroup>
 ```
 
