@@ -20,6 +20,10 @@
       <Visible>False</Visible>
     </NuSpecFile>
   </ItemGroup>
+
+  <PropertyGroup Condition="$(NuSpecTfm) == '' and '$(TargetPlatformIdentifier)' == 'UAP'">
+    <NuSpecTfm>uap10.0</NuSpecTfm>
+  </PropertyGroup>
   <PropertyGroup Condition="$(NuSpecTfm) == ''">
     <NuSpecTfm>dotnet</NuSpecTfm>
   </PropertyGroup>

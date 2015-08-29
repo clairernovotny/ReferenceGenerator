@@ -81,7 +81,8 @@ By default, the tool will look for a .nuspec file with the same name as your lib
 ```
 
 **Target Frameworks**
-By default, the tool will add/update a dependency group for the `dotnet` TFM. In some cases, you may need to also include another one like `uap10.0`. An example of this is if your package includes a `win8` or `win81` library but you'd like the .NET Core-based one to be used there. `dotnet` isn't enough as `win81` is more specific and would "win." Instead, just copy your `dotnet` library to also be under `\lib\uap10.0` and specify an additional TFM for the tool to add/update. This should be a semi-colon joined list.
+By default, the tool will add/update a dependency group for the `dotnet` TFM for a PCL or `uap10.0` for a UWP Class Library. 
+In some cases, you may need to have multiple dependency groups, like having both `dotnet` and `uap10.0`. An example of this is if your package includes a `win8` or `win81` library but you'd like the .NET Core-based one to be used there. `dotnet` isn't enough as `win81` is more specific and would "win." Instead, just copy your `dotnet` library to also be under `\lib\uap10.0` and specify an additional TFM for the tool to add/update. This should be a semi-colon joined list.
 ```xml
 <PropertyGroup>
 	<!-- dotnet and uap10.0 tfms -->
