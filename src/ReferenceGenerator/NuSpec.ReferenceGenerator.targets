@@ -31,7 +31,7 @@
 
     <!-- Build the command here as quotes are easier this way -->
     <PropertyGroup>
-      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "$(NuGetTargetMoniker)" $(NuSpecTfm) "@(NuSpecFile)" "@(NuSpecProjectFile)" "@(NuSpecLibContent)"</RefGenExecCmd>
+      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "$(NuGetTargetMoniker);$(_NuGetTargetFallbackMoniker)" $(NuSpecTfm) "@(NuSpecFile)" "@(NuSpecProjectFile)" "@(NuSpecLibContent)"</RefGenExecCmd>
     </PropertyGroup>
 
 

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>SampleUwpLibrary</id>
+    <version>1.0.0</version>
+    <authors>Author</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>My package description.</description>
+    <dependencies>
+      <group targetFramework="uap10.0">
+        <dependency id="System.Runtime" version="4.0.20" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

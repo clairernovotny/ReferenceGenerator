@@ -19,7 +19,7 @@ namespace ReferenceGenerator
 
         private static int Main(string[] args)
         {
-            // args 0: NuGetTargetMoniker -- .NETPlatform,Version=v5.0  
+            // args 0: NuGetTargetMonikers -- .NETPlatform,Version=v5.0  
             // args 1: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0 
             // args 2: nuspec file
             // args 3: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
@@ -27,17 +27,19 @@ namespace ReferenceGenerator
 
             try
             {
-                var nugetTargetMoniker = args[0];
+                var nugetTargetMonikers = args[0].Split(';')
+                                                 .Where(s => !string.IsNullOrWhiteSpace(s))
+                                                 .ToArray();
                 var tfms = args[1].Split(';')
-                                       .Where(s => !string.IsNullOrWhiteSpace(s))
-                                       .ToArray();
+                                  .Where(s => !string.IsNullOrWhiteSpace(s))
+                                  .ToArray();
                 var nuspecFile = args[2];
                 var projectFiles = args[3].Split(';')
-                                               .Where(s => !string.IsNullOrWhiteSpace(s))
-                                               .ToArray();
+                                          .Where(s => !string.IsNullOrWhiteSpace(s))
+                                          .ToArray();
                 var files = args[4].Split(';')
-                                        .Where(s => !string.IsNullOrWhiteSpace(s))
-                                        .ToArray();
+                                   .Where(s => !string.IsNullOrWhiteSpace(s))
+                                   .ToArray();
 
                 var microsoftRefs = new[] {"Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives"};
                 MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
@@ -55,16 +57,16 @@ namespace ReferenceGenerator
                     if (File.Exists(Path.Combine(projDir, $"{projectFileName}.project.json")))
                     {
                         // ProjectName.Project.json
-                        var lockFile = Path.Combine(Path.GetDirectoryName(projDir), $"{projectFileName}.project.lock.json");
+                        var lockFile = Path.Combine(projDir, $"{projectFileName}.project.lock.json");
 
-                        var pkgs = GetProjectJsonPackages(lockFile, assm.References, nugetTargetMoniker);
+                        var pkgs = GetProjectJsonPackages(lockFile, assm.References, nugetTargetMonikers);
                         packages.AddRange(pkgs);
                     }
                     else if (File.Exists(Path.Combine(projDir, "project.json")))
                     {
                         // Project.json
-                        var lockFile = Path.Combine(Path.GetDirectoryName(projDir), "project.lock.json");
-                        var pkgs = GetProjectJsonPackages(lockFile, assm.References, nugetTargetMoniker);
+                        var lockFile = Path.Combine(projDir, "project.lock.json");
+                        var pkgs = GetProjectJsonPackages(lockFile, assm.References, nugetTargetMonikers);
                         packages.AddRange(pkgs);
                     }
                     else if (File.Exists(Path.Combine(projDir, $"packages.{projectFileName}.config")))
@@ -166,7 +168,7 @@ namespace ReferenceGenerator
             xdoc.Save(nuspecFile, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error
         }
 
-        static IEnumerable<Package> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, string nugetTargetMoniker)
+        static IEnumerable<Package> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, string[] nugetTargetMonikers)
         {
             // This needs to load the project.lock.json, look for the reference under the 
             // targets -> ".NETPlatform,Version=v5.0", look for each package and the files in it, then pull out based on refs
@@ -179,11 +181,26 @@ namespace ReferenceGenerator
                 projectJson = JObject.Load(reader);
             }
 
-            // Look for the first .NETPlatform entry in the targets
-            var netPlatform = (JObject)((JObject)projectJson["targets"])
-                                    .Properties()
-                                    .First(p => p.Name.StartsWith(nugetTargetMoniker, StringComparison.OrdinalIgnoreCase))
-                                    .Value;
+            JObject netPlatform = null;
+
+            foreach (var tfm in nugetTargetMonikers)
+            {
+                // Look for the first .NETPlatform entry in the targets
+                netPlatform = (JObject)((JObject)projectJson["targets"])
+                                        .Properties()
+                                        .FirstOrDefault(p => p.Name.StartsWith(tfm, StringComparison.OrdinalIgnoreCase))?
+                                        .Value;
+
+                // found one
+                if (netPlatform != null)
+                    break;
+            }
+
+            if (netPlatform == null)
+            {
+                // error
+                throw new InvalidOperationException($"project.lock.json is missing TFM for {string.Join(" or ", nugetTargetMonikers)}");
+            }
 
             // build a lookup of filenames to packages
             var query = (from package in netPlatform.Properties()
