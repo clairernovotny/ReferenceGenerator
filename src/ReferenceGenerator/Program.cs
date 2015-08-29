@@ -38,7 +38,6 @@ namespace ReferenceGenerator
                 var files = args[4].Split(';')
                                         .Where(s => !string.IsNullOrWhiteSpace(s))
                                         .ToArray();
-       
 
                 var microsoftRefs = new[] {"Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives"};
                 MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
@@ -50,18 +49,27 @@ namespace ReferenceGenerator
                 {
 
                     var assm = AssemblyInfo.GetAssemblyInfo(files[i]);
-
+                    var projectFileName = Path.GetFileNameWithoutExtension(projectFiles[i]);
 
                     var projDir = Path.GetDirectoryName(projectFiles[i]);
-                    if (File.Exists(Path.Combine(projDir, "project.json")))
+                    if (File.Exists(Path.Combine(projDir, $"{projectFileName}.project.json")))
                     {
-                        // Project.json
-                        var pkgs = GetProjectJsonPackages(projectFiles[i], assm.References, nugetTargetMoniker);
+                        // ProjectName.Project.json
+                        var lockFile = Path.Combine(Path.GetDirectoryName(projDir), $"{projectFileName}.project.lock.json");
+
+                        var pkgs = GetProjectJsonPackages(lockFile, assm.References, nugetTargetMoniker);
                         packages.AddRange(pkgs);
                     }
-                    else if (File.Exists(Path.Combine(projDir, $"packages.{Path.GetFileNameWithoutExtension(projectFiles[i])}.config")))
+                    else if (File.Exists(Path.Combine(projDir, "project.json")))
                     {
-                        var pkgs = GetPackagesConfigPackages(projectFiles[i], $"packages.{Path.GetFileNameWithoutExtension(projectFiles[i])}.config", assm.References);
+                        // Project.json
+                        var lockFile = Path.Combine(Path.GetDirectoryName(projDir), "project.lock.json");
+                        var pkgs = GetProjectJsonPackages(lockFile, assm.References, nugetTargetMoniker);
+                        packages.AddRange(pkgs);
+                    }
+                    else if (File.Exists(Path.Combine(projDir, $"packages.{projectFileName}.config")))
+                    {
+                        var pkgs = GetPackagesConfigPackages(projectFiles[i], $"packages.{projectFileName}.config", assm.References);
                         packages.AddRange(pkgs);
                     }
                     else if (File.Exists(Path.Combine(projDir, "packages.config")))
@@ -153,22 +161,15 @@ namespace ReferenceGenerator
                 {
                     deps.Add(ele);
                 }
-
-
             }
-
-
 
             xdoc.Save(nuspecFile, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error
         }
 
-        static IEnumerable<Package> GetProjectJsonPackages(string projectFile, IEnumerable<Reference> refs, string nugetTargetMoniker)
+        static IEnumerable<Package> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, string nugetTargetMoniker)
         {
             // This needs to load the project.lock.json, look for the reference under the 
             // targets -> ".NETPlatform,Version=v5.0", look for each package and the files in it, then pull out based on refs
-
-            // Make sure the lock file is present. It should be if we're called after build
-            var lockFile = Path.Combine(Path.GetDirectoryName(projectFile), "project.lock.json");
             if (!File.Exists(lockFile))
                 throw new InvalidOperationException("project.lock.json is missing");
 
