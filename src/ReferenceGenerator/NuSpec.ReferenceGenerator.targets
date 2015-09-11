@@ -16,12 +16,13 @@
   </ItemGroup>
   
   <PropertyGroup>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(MSBuildProjectDirectory)..\</SolutionDir>
+    <NuSpecSearchRoot>$(SolutionDir)</NuSpecSearchRoot>
+    <NuSpecSearchRoot Condition="$(NuSpecSearchRoot) == '' Or $(NuSpecSearchRoot) == '*Undefined*'">$(MSBuildProjectDirectory)\..\</NuSpecSearchRoot>
   </PropertyGroup>
   
   <ItemGroup Condition="@(NuSpecFile) == ''">
     <!-- Look for a nuspec that matches the output name -->
-    <NuSpecFile Include="$(SolutionDir)**\$(TargetName).nuspec">
+    <NuSpecFile Include="$(NuSpecSearchRoot)**\$(TargetName).nuspec">
       <Visible>False</Visible>
     </NuSpecFile>
   </ItemGroup>
