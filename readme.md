@@ -105,6 +105,7 @@ This tool is a command line that you can call in other ways. The parameters are 
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
 
 ## Changelog
+- 1.3.2: Check for blank `$(SolutionDir)` and default to parent directory of project
 - 1.3.1: Set default TFM for UWP class libraries to `uap10.0`
 - 1.3: Fix bug when using with UWP class libraries. Also include support for *projectName*.project.json added in NuGet 3.2.
 - 1.2: Prevent included items (nuspec, project files, libraries) from showing up in Visual Studio. Changed NuSpecTfm to a `PropertyGroup` from an `ItemGroup`.
