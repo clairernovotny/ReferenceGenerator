@@ -14,6 +14,11 @@
       <Visible>False</Visible>
     </NuSpecProjectFile>
   </ItemGroup>
+  
+  <PropertyGroup>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(MSBuildProjectDirectory)..\</SolutionDir>
+  </PropertyGroup>
+  
   <ItemGroup Condition="@(NuSpecFile) == ''">
     <!-- Look for a nuspec that matches the output name -->
     <NuSpecFile Include="$(SolutionDir)**\$(TargetName).nuspec">
