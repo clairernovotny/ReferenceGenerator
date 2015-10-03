@@ -10,5 +10,6 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>nuspec coreclr dnx nuget dependency dotnet</tags>
     <description>Tool to auto-generate BCL package nuspec dependencies for CoreCLR projects</description>
+    <developmentDependency>true</developmentDependency>
   </metadata>
 </package>
