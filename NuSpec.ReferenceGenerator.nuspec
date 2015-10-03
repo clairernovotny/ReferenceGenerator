@@ -1,15 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>NuSpec.ReferenceGenerator</id>
-    <version>1.3.3</version>
+    <version>1.3.4</version>
     <title>NuSpec Dependency Generator</title>
     <authors>Oren Novotny</authors>
     <licenseUrl>https://raw.githubusercontent.com/onovotny/ReferenceGenerator/master/LICENSE.txt</licenseUrl>
     <projectUrl>https://github.com/onovotny/ReferenceGenerator</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <tags>nuspec coreclr dnx nuget dependency dotnet</tags>
-    <description>Tool to auto-generate BCL package nuspec dependencies for CoreCLR projects</description>
     <developmentDependency>true</developmentDependency>
-  </metadata>
+    <description>Tool to auto-generate BCL package nuspec dependencies for CoreCLR projects</description>
+    <summary>Generates the dependencies for a NuSpec to enable proper dotnet and uap NuGet resolution</summary>
+    <releaseNotes>Release notes here: https://github.com/onovotny/ReferenceGenerator#changelog</releaseNotes>
+    <tags>nuspec coreclr dnx nuget dependency dotnet</tags>
+  </metadata>  
 </package>

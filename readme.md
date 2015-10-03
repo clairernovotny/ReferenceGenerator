@@ -105,6 +105,7 @@ This tool is a command line that you can call in other ways. The parameters are 
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
 
 ## Changelog
+- 1.3.4: Set `developmentDependency=true` to prevent `NuSpec.ReferenceGenerator` from being seen a runtime dependency
 - 1.3.3: Add backslash to NuSpecFile search path when SolutionDir isn't defined, don't define SolutionDir if it's not already defined
 - 1.3.2: Check for blank `$(SolutionDir)` and default to parent directory of project
 - 1.3.1: Set default TFM for UWP class libraries to `uap10.0`
