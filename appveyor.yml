@@ -16,6 +16,6 @@ build:
   project: ReferenceGenerator.sln
   
 after_build:  
-  - cmd: ECHO .nuget\nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%-build%GitVersion_BuildMetadataPadded%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
-  - cmd: .nuget\nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%-build%GitVersion_BuildMetadataPadded%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
-  - cmd: appveyor PushArtifact "NuSpec.ReferenceGenerator.%GitVersion_NuGetVersion%-build%GitVersion_BuildMetadataPadded%.nupkg"
+  - cmd: ECHO .nuget\nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
+  - cmd: .nuget\nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
+  - cmd: appveyor PushArtifact "NuSpec.ReferenceGenerator.%GitVersion_NuGetVersion%.nupkg"
