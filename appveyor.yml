@@ -1,5 +1,4 @@
 configuration: Release
-platform: Any CPU
 install:
   - cmd: choco install gitversion.portable -pre -y
   - cmd: appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
@@ -8,7 +7,7 @@ assembly_info:
   patch: false
       
 before_build:  
-  - cmd: .\nuget.exe restore
+  - cmd: nuget restore
   - cmd: gitversion /l console /output buildserver /updateAssemblyInfo
   
 build:
@@ -16,6 +15,6 @@ build:
   project: ReferenceGenerator.sln
   
 after_build:  
-  - cmd: ECHO .\nuget.exe pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
-  - cmd: .\nuget.exe pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
+  - cmd: ECHO nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
+  - cmd: nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
   - cmd: appveyor PushArtifact "NuSpec.ReferenceGenerator.%GitVersion_NuGetVersion%.nupkg"
