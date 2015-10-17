@@ -13,8 +13,8 @@ before_build:
 build:
   verbosity: normal
   project: ReferenceGenerator.sln
+  parallel: true
   
-after_build:  
-  - cmd: ECHO nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
+after_build:    
   - cmd: nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
   - cmd: appveyor PushArtifact "NuSpec.ReferenceGenerator.%GitVersion_NuGetVersion%.nupkg"
