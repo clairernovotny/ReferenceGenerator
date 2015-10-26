@@ -4,6 +4,12 @@ Package authoring for .NET Core based libraries (ASPNet 5, DNX, UWP) has an extr
 
 This tool aims to help by reading your compiled libraries assembly metadata and determine what that list should be. It currently supports any `System.Runtime` based project, including "Profile 259"+ PCL's -- that is, a PCL that targets at least .NET 4.5, Windows 8 and Windows Phone 8.
 
+### Build Status
+|Branch | Status|
+|:-------|-------:|
+| master |[![Build status](https://ci.appveyor.com/api/projects/status/6h5oj7x2ld4mi6at/branch/master?svg=true)](https://ci.appveyor.com/project/onovotny/referencegenerator/branch/master)|
+
+
 ## Usage
 This tool uses some conventions to locate your `nuspec` file and input libraries. These can be overridden in your project file. The tool looks for a `.nuspec` file with the same name as your target library underneath the solution root directory. By default, it will add/update a `<dependencies>` group for the `dotnet` TFM, but you can have it generate others by overriding your project file value.
 
