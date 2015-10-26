@@ -103,8 +103,14 @@
             }
 
             var value = match.Groups["name"].Value;
-            var number = match.Groups["number"].Success ? int.Parse(match.Groups["number"].Value) : (int?)null;
-            if (value.EndsWith("-"))
+            int numberTemp = 0;
+            int? number = null;
+            if (match.Groups["number"].Success && int.TryParse(match.Groups["number"].Value, out numberTemp))
+            {
+                number = numberTemp;
+            }
+
+            if (value.EndsWith("-") || !number.HasValue)
                 return new SemanticVersionPreReleaseTag(preReleaseTag, null);
 
             return new SemanticVersionPreReleaseTag(value, number);
