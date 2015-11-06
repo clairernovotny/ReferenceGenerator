@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -255,7 +256,7 @@ namespace ReferenceGenerator
 
             // check the version
             double ver;
-            if (!double.TryParse(version.Substring(1), out ver) || ver < 4.5)
+            if (!double.TryParse(version.Substring(1), NumberStyles.Any, CultureInfo.InvariantCulture, out ver) || ver < 4.5)
                 throw new InvalidOperationException("Only System.Runtime-based PCL's are supported. Ensure that you're targetting at least Net45, Win8 and wp8");
 
 

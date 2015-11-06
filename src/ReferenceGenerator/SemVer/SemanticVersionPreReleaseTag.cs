@@ -1,4 +1,6 @@
-﻿namespace GitVersion
+﻿using System.Globalization;
+
+namespace GitVersion
 {
     // From the GitVersion project https://github.com/GitTools/GitVersion
     // MIT License - Copyright (c) 2013 NServiceBus LtdLtd
@@ -105,7 +107,7 @@
             var value = match.Groups["name"].Value;
             int numberTemp = 0;
             int? number = null;
-            if (match.Groups["number"].Success && int.TryParse(match.Groups["number"].Value, out numberTemp))
+            if (match.Groups["number"].Success && int.TryParse(match.Groups["number"].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out numberTemp))
             {
                 number = numberTemp;
             }
