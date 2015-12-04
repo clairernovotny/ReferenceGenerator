@@ -77,7 +77,7 @@ namespace ReferenceGenerator
                     }
                     else if (File.Exists(Path.Combine(projDir, "packages.config")))
                     {
-                        var pkgs = GetPackagesConfigPackages(projectFiles[i], $"packages.config", assm.References);
+                        var pkgs = GetPackagesConfigPackages(projectFiles[i], "packages.config", assm.References);
                         packages.AddRange(pkgs);
                     }
                     else
@@ -183,6 +183,7 @@ namespace ReferenceGenerator
             }
 
             JObject netPlatform = null;
+            string chosenTfm = null;
 
             foreach (var tfm in nugetTargetMonikers)
             {
@@ -194,7 +195,10 @@ namespace ReferenceGenerator
 
                 // found one
                 if (netPlatform != null)
+                {
+                    chosenTfm = tfm;
                     break;
+                }
             }
 
             if (netPlatform == null)
@@ -225,9 +229,38 @@ namespace ReferenceGenerator
             var assmToPackage = query.ToDictionary(q => q.Key, v => v.First());
 
             var results = (from assmRef in refs
-                          join kvp in assmToPackage on assmRef.Name equals kvp.Key
-                          select kvp.Value).ToList();
+                           join kvp in assmToPackage on assmRef.Name equals kvp.Key
+                           select kvp.Value).ToList();
+            
 
+            if (chosenTfm.StartsWith(".NETPortable", StringComparison.OrdinalIgnoreCase))
+            {
+                // we're dealing with an "classic PCL"
+                // We need to determine system refs
+                var data = chosenTfm.Split(',');
+                if (data.Length != 3)
+                    throw new ArgumentException("TFM for .NETPortable must contain version and profile");
+
+                // Todo: better error handling and messages
+                var version = data[1].Split('=')[1];
+                var profile = data[2].Split('=')[1];
+
+
+                // build out system refs
+                var sysRefs = (from r in refs
+                               where IsFrameworkReference(r.Name, version, profile)
+                               select r)
+                              .ToList();
+
+                // filter out any system packages that might be present as a nuget package
+                var toAdd = from sr in sysRefs
+                            where !results.Any(p => p.Id.Equals(sr.Name, StringComparison.OrdinalIgnoreCase))
+                            select sr;
+
+                // for sys refs, we use the assm ver
+                results.AddRange(GetPackagesFromAssemblyRefs(toAdd));
+            }
+            
             return results;
         }
 
