@@ -10,7 +10,7 @@ Function Install-NuGet(
         return
     }
 
-    Write-Host "Installating NuGet.exe..."
+    Write-Host "Installing NuGet.exe..."
     Invoke-WebRequest https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile $nuGet
     Write-Host "Successfully installed NuGet."
 }
