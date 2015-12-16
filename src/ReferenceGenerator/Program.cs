@@ -106,6 +106,13 @@ namespace ReferenceGenerator
                 UpdateNuspecFile(nuspecFile, groups, tfms);
                 return 0;
             }
+            catch (UnixNotSupportedException)
+            {
+                // If we're in a place where we cannot check reference assemblies on Unix, issue a 
+                // warning and return a non-error code 
+                Console.Error.WriteLine(WarningWithMessage.ClassicPclUnix);
+                return 0;
+            }
             catch (Exception e)
             {
                 Console.Error.WriteLine(new ErrorWithMessage(e));
@@ -237,6 +244,7 @@ namespace ReferenceGenerator
             {
                 // we're dealing with an "classic PCL"
                 // We need to determine system refs
+
                 var data = chosenTfm.Split(',');
                 if (data.Length != 3)
                     throw new ArgumentException("TFM for .NETPortable must contain version and profile");
@@ -276,7 +284,7 @@ namespace ReferenceGenerator
             // To determine if it's a system ref, check the file's existence in the filesystem
             // Obviously this will only work on Windows
 
-            
+           
 
             var projDoc = XDocument.Load(projectFile);
             XNamespace projNs = projDoc.Root.Attribute("xmlns")?.Value ?? string.Empty;
@@ -353,12 +361,16 @@ namespace ReferenceGenerator
             
         }
 
-        static readonly string ProgramFiles = 
-            Environment.Is64BitOperatingSystem? Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) : 
-                                                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-        static readonly string PortableDir = Path.Combine(ProgramFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+        static readonly string PortableDir = GetPortableDirWindows();
         static bool IsFrameworkReference(string assemblyName, string version, string profile)
         {
+
+            // If we're not on Windows, we cannot reliably know the reference assemblies
+            if (!IsWindows)
+            {
+                throw new UnixNotSupportedException();
+            }
+
             var filePath = Path.Combine(PortableDir, version, "Profile", profile, $"{assemblyName}.dll");
             return File.Exists(filePath);
         }
@@ -395,5 +407,25 @@ namespace ReferenceGenerator
 
             return ele;
         }
+
+        static string GetPortableDirWindows()
+        {
+            var programFiles =
+            Environment.Is64BitOperatingSystem ? Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) :
+                                                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+
+            var portableDir = Path.Combine(programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+
+            return portableDir;
+        }
+
+        static bool IsWindows => Environment.OSVersion.Platform == PlatformID.Win32NT;
+        
+    }
+
+    [Serializable]
+    class UnixNotSupportedException : Exception
+    {
+        
     }
 }

@@ -48,6 +48,16 @@ namespace ReferenceGenerator
         public Warning(string code) : base("warning", code) { }
     }
 
+    class WarningWithMessage : Warning
+    {
+        public WarningWithMessage(string message, string code) : base(code)
+        {
+            Message = message;
+        }
+
+        public static readonly WarningWithMessage ClassicPclUnix = new WarningWithMessage("Classic PCL's, including Profile 259, cannot be updated on non-Windows Operating Systems", "RG002");
+    }
+
     class Error : Diagnostic
     {
         public Error(string code) : base("error", code) { }
