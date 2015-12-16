@@ -55,7 +55,7 @@ namespace ReferenceGenerator
             Message = message;
         }
 
-        public static readonly WarningWithMessage ClassicPclUnix = new WarningWithMessage("Classic PCL's, including Profile 259, cannot be updated on non-Windows Operating Systems", "RG002");
+        public static readonly WarningWithMessage ClassicPclUnix = new WarningWithMessage("Classic PCL's, including Profile 259, cannot be updated on non-Windows Operating Systems. No changes have been made.", "RG002");
     }
 
     class Error : Diagnostic
