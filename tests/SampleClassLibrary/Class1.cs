@@ -12,7 +12,9 @@ namespace SampleClassLibrary
     [JsonConverter(typeof(StringEnumConverter))]
     public class Class1
     {
+#pragma warning disable 169
         XDocument doc;
+#pragma warning restore 169
         public Class1()
         {
             var md = this.GetType().GetMethod("foo");
