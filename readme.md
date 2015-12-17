@@ -1,5 +1,7 @@
 # NuSpec Reference Generator
 ## Overview
+
+[![Join the chat at https://gitter.im/onovotny/ReferenceGenerator](https://badges.gitter.im/onovotny/ReferenceGenerator.svg)](https://gitter.im/onovotny/ReferenceGenerator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Package authoring for .NET Core based libraries (ASPNet 5, DNX, UWP) has an extra burden on the author as .NET dependencies must be listed in addition to any regular packages you depend on. This could be a long list and it's a challenge to get it right. If you use any of the meta-packages that brings "all" of .NET Core into your project as possible references, how do you know which you actually need?
 
 This tool aims to help by reading your compiled libraries assembly metadata and determine what that list should be. It currently supports any `System.Runtime` based project, including "Profile 259"+ PCL's -- that is, a PCL that targets at least .NET 4.5, Windows 8 and Windows Phone 8.
