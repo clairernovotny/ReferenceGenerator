@@ -47,8 +47,9 @@
       <RefGenExecCmd>mono "$(MSBuildThisFileDirectory)../../tools/RefGen.exe" "$(NuGetTargetMoniker);$(_NuGetTargetFallbackMoniker)" $(NuSpecTfm) "@(NuSpecFile)" "@(NuSpecProjectFile)" "@(NuSpecLibContent)"</RefGenExecCmd>
     </PropertyGroup>
 
-    <Exec Command="$(RefGenExecCmd)" />
-    <Message Text="Updated Nuspec" />
+    <Exec Command="$(RefGenExecCmd)" Condition="'$(OS)' == 'Windows_NT'" />
+    <Message Text="Updated Nuspec" Condition="'$(OS)' == 'Windows_NT'" />
+    <Message Text="Warning Nuspec Reference Generator Does not support Linux/Unix yet" Condition="'$(OS)' != 'Windows_NT'" />
 
   </Target>
 </Project>
