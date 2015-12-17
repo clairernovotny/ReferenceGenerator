@@ -111,6 +111,7 @@ This tool is a command line that you can call in other ways. The parameters are 
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
 
 ## Changelog
+- 1.4.1: Issue warning and do not run RefGen on non-Windows systems until full mono compatibility is tested and verified. Prevents breaking builds.
 - 1.4: Fix issue where BCL libs weren't detected correctly for PCL projects using project.json instead of packages.config
 - 1.3.6: Fix TFM version parsing when running on cultures that use `,` instead of `.` ([#14](https://github.com/onovotny/ReferenceGenerator/issues/14))
 - 1.3.5: Fix for pre-release number parsing so that it can work with a "number" group that is larger than `int.MaxValue` ([#13](https://github.com/onovotny/ReferenceGenerator/pull/13))
