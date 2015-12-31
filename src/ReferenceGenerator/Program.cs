@@ -385,7 +385,7 @@ namespace ReferenceGenerator
         {
             var mde = doc.Root.Element(nuspecNs + "metadata");
             if (mde == null)
-                throw new ArgumentException("NuSpec XML namespaces are not correctly formed. Ensure the xmlns is on the root element", nameof(doc));
+                throw new ArgumentException("NuSpec XML namespaces are not correctly formed. Ensure the xmlns is on the root package element", nameof(doc));
 
             var deps = mde.Element(nuspecNs + "dependencies");
 
