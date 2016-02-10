@@ -15,7 +15,7 @@
     <TargetFrameworkProfile />
     <StartWorkingDirectory>$(SolutionDir)</StartWorkingDirectory>
     <StartAction>Project</StartAction>
-    <StartArguments>".NETPlatform,Version=v5.0" dotnet "tests\SampleClassLibrary\SampleClassLibrary.nuspec"  "tests\SampleClassLibrary\SampleClassLibrary.csproj;tests\SampleCoreLibrary\SampleCoreLibrary.csproj"  "tests\SampleClassLibrary\bin\Debug\SampleClassLibrary.dll;tests\SampleClassLibrary\bin\Debug\SampleCoreLibrary.dll"</StartArguments>
+    <StartArguments>".NETPlatform,Version=v5.4" netstandard1.3 "tests\SampleNetStandard11Library\SampleNetStandard11Library.nuspec"  "tests\SampleNetStandard11Library\SampleNetStandard11Library.csproj"  "tests\SampleNetStandard11Library\bin\Debug\SampleNetStandard11Library.dll"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>

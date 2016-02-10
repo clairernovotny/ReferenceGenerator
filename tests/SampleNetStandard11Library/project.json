@@ -1,0 +1,12 @@
+﻿{
+  "supports": {
+  },
+  "dependencies": {
+   "Microsoft.NETCore": "5.0.1-rc2-23623"
+      
+  },
+  "frameworks": {
+    "dotnet5.4": {
+    }
+  }
+}
