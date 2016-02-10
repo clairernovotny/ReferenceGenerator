@@ -370,8 +370,20 @@ namespace ReferenceGenerator
                 throw new UnixNotSupportedException();
             }
 
-            var filePath = Path.Combine(PortableDir, $"v{framework.Version.ToString(2)}", "Profile", framework.Profile, $"{assemblyName}.dll");
+            var filePath = Path.Combine(PortableDir, $"v{GetDisplayVersion(framework.Version)}", "Profile", framework.Profile, $"{assemblyName}.dll");
             return File.Exists(filePath);
+        }
+
+        static string GetDisplayVersion(Version version)
+        {
+            var stringBuilder = new StringBuilder(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major,version.Minor));
+            if (version.Build > 0 || version.Revision > 0)
+            {
+                stringBuilder.AppendFormat(CultureInfo.InvariantCulture, ".{0}", version.Build);
+                if (version.Revision > 0)
+                    stringBuilder.AppendFormat(CultureInfo.InvariantCulture, ".{0}", version.Revision);
+            }
+            return stringBuilder.ToString();
         }
 
         static IEnumerable<Package> GetPackagesFromAssemblyRefs(IEnumerable<Reference> refs)
