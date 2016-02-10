@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NuGet.Frameworks;
 
 namespace ReferenceGenerator
 {
@@ -30,11 +31,15 @@ namespace ReferenceGenerator
             {
                 var nugetTargetMonikers = args[0].Split(';')
                                                  .Where(s => !string.IsNullOrWhiteSpace(s))
+                                                 .Select(NuGetFramework.Parse)
                                                  .ToArray();
                 var tfms = args[1].Split(';')
                                   .Where(s => !string.IsNullOrWhiteSpace(s))
+                                  .Select(NuGetFramework.Parse)
                                   .ToArray();
+
                 var nuspecFile = args[2];
+
                 var projectFiles = args[3].Split(';')
                                           .Where(s => !string.IsNullOrWhiteSpace(s))
                                           .ToArray();
@@ -121,7 +126,7 @@ namespace ReferenceGenerator
             }
         }
 
-        static void UpdateNuspecFile(string nuspecFile, IReadOnlyList<Package> packages, IEnumerable<string> tfms)
+        static void UpdateNuspecFile(string nuspecFile, IReadOnlyList<Package> packages, IEnumerable<NuGetFramework> tfms)
         {
 
             var refNames = new HashSet<string>(packages.Select(g => g.Id), StringComparer.OrdinalIgnoreCase);
@@ -150,7 +155,7 @@ namespace ReferenceGenerator
                 var ele = CreateDependencyElement(tfm, packages, nuspecNs);
 
                 // see if we have a node with this tfm
-                var grp = deps.XPathSelectElement($"./ns:group[@targetFramework='{tfm}']", nsm);
+                var grp = deps.XPathSelectElement($"./ns:group[@targetFramework='{tfm.GetShortFolderName()}']", nsm);
                 if (grp != null)
                 {
                     // Need to merge
@@ -176,7 +181,7 @@ namespace ReferenceGenerator
             xdoc.Save(nuspecFile, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error
         }
 
-        static IEnumerable<Package> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, string[] nugetTargetMonikers)
+        static IEnumerable<Package> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, NuGetFramework[] nugetTargetMonikers)
         {
             // This needs to load the project.lock.json, look for the reference under the 
             // targets -> ".NETPlatform,Version=v5.0", look for each package and the files in it, then pull out based on refs
@@ -190,14 +195,14 @@ namespace ReferenceGenerator
             }
 
             JObject netPlatform = null;
-            string chosenTfm = null;
+            NuGetFramework chosenTfm = null;
 
             foreach (var tfm in nugetTargetMonikers)
             {
                 // Look for the first .NETPlatform entry in the targets
                 netPlatform = (JObject)((JObject)projectJson["targets"])
                                         .Properties()
-                                        .FirstOrDefault(p => p.Name.StartsWith(tfm, StringComparison.OrdinalIgnoreCase))?
+                                        .FirstOrDefault(p => p.Name.StartsWith(tfm.DotNetFrameworkName, StringComparison.OrdinalIgnoreCase))?
                                         .Value;
 
                 // found one
@@ -211,7 +216,7 @@ namespace ReferenceGenerator
             if (netPlatform == null)
             {
                 // error
-                throw new InvalidOperationException($"project.lock.json is missing TFM for {string.Join(" or ", nugetTargetMonikers)}");
+                throw new InvalidOperationException($"project.lock.json is missing TFM for {string.Join(" or ", nugetTargetMonikers.Select(t => t.DotNetFrameworkName))}");
             }
 
             // build a lookup of filenames to packages
@@ -240,23 +245,16 @@ namespace ReferenceGenerator
                            select kvp.Value).ToList();
             
 
-            if (chosenTfm.StartsWith(".NETPortable", StringComparison.OrdinalIgnoreCase))
+            if (chosenTfm.IsPCL)
             {
                 // we're dealing with an "classic PCL"
                 // We need to determine system refs
 
-                var data = chosenTfm.Split(',');
-                if (data.Length != 3)
-                    throw new ArgumentException("TFM for .NETPortable must contain version and profile");
-
-                // Todo: better error handling and messages
-                var version = data[1].Split('=')[1];
-                var profile = data[2].Split('=')[1];
-
+                
 
                 // build out system refs
                 var sysRefs = (from r in refs
-                               where IsFrameworkReference(r.Name, version, profile)
+                               where IsFrameworkReference(r.Name, chosenTfm)
                                select r)
                               .ToList();
 
@@ -301,9 +299,10 @@ namespace ReferenceGenerator
                 throw new InvalidOperationException("Only System.Runtime-based PCL's are supported. Ensure that you're targetting at least Net45, Win8 and wp8");
 
 
+            var framework = new NuGetFramework(".NETPortable", Version.Parse(version.Substring(1)), profile);
             // build out system refs
             var sysRefs = (from r in assemblyRefs
-                          where IsFrameworkReference(r.Name, version, profile)
+                          where IsFrameworkReference(r.Name, framework)
                           select r)
                           .ToList();
 
@@ -362,7 +361,7 @@ namespace ReferenceGenerator
         }
 
         static readonly string PortableDir = GetPortableDirWindows();
-        static bool IsFrameworkReference(string assemblyName, string version, string profile)
+        static bool IsFrameworkReference(string assemblyName, NuGetFramework framework)
         {
 
             // If we're not on Windows, we cannot reliably know the reference assemblies
@@ -371,7 +370,7 @@ namespace ReferenceGenerator
                 throw new UnixNotSupportedException();
             }
 
-            var filePath = Path.Combine(PortableDir, version, "Profile", profile, $"{assemblyName}.dll");
+            var filePath = Path.Combine(PortableDir, $"v{framework.Version.ToString(2)}", "Profile", framework.Profile, $"{assemblyName}.dll");
             return File.Exists(filePath);
         }
 
@@ -398,9 +397,9 @@ namespace ReferenceGenerator
             return deps;
         }
 
-        static XElement CreateDependencyElement(string tfm, IEnumerable<Package> refs, XNamespace nuspecNs)
+        static XElement CreateDependencyElement(NuGetFramework tfm, IEnumerable<Package> refs, XNamespace nuspecNs)
         {
-            var ele = new XElement(nuspecNs + "group", new XAttribute("targetFramework", tfm),
+            var ele = new XElement(nuspecNs + "group", new XAttribute("targetFramework", tfm.GetShortFolderName()),
                 refs.Select(r =>
                     new XElement(nuspecNs + "dependency",
                         new XAttribute("id", r.Id),

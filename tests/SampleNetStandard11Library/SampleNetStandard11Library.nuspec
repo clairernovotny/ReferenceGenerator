@@ -7,7 +7,10 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>My package description.</description>
     <dependencies>
-
+      <group targetFramework="netstandard1.3">
+        <dependency id="System.Resources.ResourceManager" version="4.0.1-rc2-23623" />
+        <dependency id="System.Runtime" version="4.0.21-rc2-23623" />
+      </group>
     </dependencies>
   </metadata>
 </package>

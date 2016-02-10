@@ -7,7 +7,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>My package description.</description>
     <dependencies>
-      <group targetFramework="dotnet">
+      <group targetFramework="netstandard1.0">
         <dependency id="System.Net.Requests" version="3.9.0" />
         <dependency id="System.Resources.ResourceManager" version="4.0.0" />
         <dependency id="System.Runtime" version="4.0.0" />

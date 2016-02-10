@@ -15,7 +15,8 @@
     <TargetFrameworkProfile />
     <StartWorkingDirectory>$(SolutionDir)</StartWorkingDirectory>
     <StartAction>Project</StartAction>
-    <StartArguments>".NETPlatform,Version=v5.4" netstandard1.3 "tests\SampleNetStandard11Library\SampleNetStandard11Library.nuspec"  "tests\SampleNetStandard11Library\SampleNetStandard11Library.csproj"  "tests\SampleNetStandard11Library\bin\Debug\SampleNetStandard11Library.dll"</StartArguments>
+    <!--<StartArguments>".NETPlatform,Version=v5.4" netstandard1.3 "tests\SampleNetStandard11Library\SampleNetStandard11Library.nuspec"  "tests\SampleNetStandard11Library\SampleNetStandard11Library.csproj"  "tests\SampleNetStandard11Library\bin\Debug\SampleNetStandard11Library.dll"</StartArguments>-->
+    <StartArguments>".NETPortable,Version=v4.5,Profile=Profile259" netstandard1.0 "tests\SampleProjJsonPcl\SampleProjJsonPcl.nuspec"  "tests\SampleProjJsonPcl\SampleProjJsonPcl.csproj"  "tests\SampleProjJsonPcl\bin\Debug\SampleProjJsonPcl.dll"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -69,7 +70,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"$(SolutionDir)scripts\BuildPackageLayout.cmd" $(Configuration)</PostBuildEvent>
+    <PostBuildEvent>rem "$(SolutionDir)scripts\BuildPackageLayout.cmd" $(Configuration)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
