@@ -161,7 +161,45 @@ namespace ReferenceGenerator
 
         static void UpdateNuspecFile(string nuspecFile, IReadOnlyList<Package> packages, IEnumerable<NuGetFramework> tfms)
         {
+            // Takes the input TFMs that the user specified and writes. For portable, we squash "inbox" references and then apply baseline updates
+            foreach (var tfm in tfms)
+            {
+                foreach(var tuple in SquashBuiltInPackages(packages, tfm))
+                {
+                    var baselined = ApplyBaselinePackageVersions(tuple.Item2).ToList();
+                    UpdateNuSpecFileForTfm(nuspecFile, baselined, tuple.Item1);
+                }
+            }
+        }
 
+        static  IEnumerable<Tuple<NuGetFramework, IEnumerable<Package>>> SquashBuiltInPackages(IEnumerable<Package> package, NuGetFramework framework)
+        {
+            // This method will calculate compatible NuGetFrameworks where the input can run on and then trim the package list based on what's in-box
+
+            if (framework.IsPackageBased)
+            {
+                foreach (var fx in CompatibilityListProvider.Default.GetFrameworksSupporting(framework))
+                {
+                    Console.WriteLine(fx);
+                }
+                
+
+            }
+            else
+            {
+                yield return new Tuple<NuGetFramework, IEnumerable<Package>>(framework, package);
+            }
+        }
+
+        /// <summary>
+        /// Writes a specific TFM and its packages into the nuspec file
+        /// </summary>
+        /// <param name="nuspecFile"></param>
+        /// <param name="framework"></param>
+        /// <param name="packages"></param>
+        static void UpdateNuSpecFileForTfm(string nuspecFile, IReadOnlyList<Package> packages, NuGetFramework framework)
+        {
+            
             var refNames = new HashSet<string>(packages.Select(g => g.Id), StringComparer.OrdinalIgnoreCase);
 
 
@@ -179,37 +217,36 @@ namespace ReferenceGenerator
             nsm.AddNamespace("ns", name);
 
             XNamespace nuspecNs = name;
-            
+
 
             var deps = GetOrCreateDependenciesNode(xdoc, nuspecNs);
-            
-            foreach (var tfm in tfms)
+
+         
+            var ele = CreateDependencyElement(framework, packages, nuspecNs);
+
+            // see if we have a node with this tfm
+            var grp = deps.XPathSelectElement($"./ns:group[@targetFramework='{framework.GetShortFolderName()}']", nsm);
+            if (grp != null)
             {
-                var ele = CreateDependencyElement(tfm, packages, nuspecNs);
+                // Need to merge
+                // find nodes that match by name, remove and then readd them
+                var existing = grp.Elements(nuspecNs + "dependency")
+                                    .Where(e => refNames.Contains(e.Attribute("id").Value))
+                                    .ToList();
 
-                // see if we have a node with this tfm
-                var grp = deps.XPathSelectElement($"./ns:group[@targetFramework='{tfm.GetShortFolderName()}']", nsm);
-                if (grp != null)
+                foreach (var xe in existing)
                 {
-                    // Need to merge
-                    // find nodes that match by name, remove and then readd them
-                    var existing = grp.Elements(nuspecNs + "dependency")
-                                      .Where(e => refNames.Contains(e.Attribute("id").Value))
-                                      .ToList();
-
-                    foreach (var xe in existing)
-                    {
-                        xe.Remove();
-                    }
-
-                    // Add the new ones back in 
-                    grp.Add(ele.Elements());
+                    xe.Remove();
                 }
-                else
-                {
-                    deps.Add(ele);
-                }
+
+                // Add the new ones back in 
+                grp.Add(ele.Elements());
             }
+            else
+            {
+                deps.Add(ele);
+            }
+            
 
             xdoc.Save(nuspecFile, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error
         }
@@ -300,7 +337,7 @@ namespace ReferenceGenerator
                 results.AddRange(GetPackagesFromAssemblyRefs(toAdd));
             }
             
-            return ApplyBaselinePackageVersions(results);
+            return results;
         }
 
         static IEnumerable<Package> GetPackagesConfigPackages(string projectFile, string packagesConfig, IEnumerable<Reference> assemblyRefs)
@@ -389,7 +426,7 @@ namespace ReferenceGenerator
                 }
             }
 
-            return ApplyBaselinePackageVersions(packages);
+            return packages;
         }
 
         static readonly string PortableDir = GetPortableDirWindows();
