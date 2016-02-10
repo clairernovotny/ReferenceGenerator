@@ -31,7 +31,7 @@
     <NuSpecTfm>uap10.0</NuSpecTfm>
   </PropertyGroup>
   <PropertyGroup Condition="$(NuSpecTfm) == ''">
-    <NuSpecTfm>dotnet</NuSpecTfm>
+    <NuSpecTfm>auto</NuSpecTfm>
   </PropertyGroup>
 
   <Target Name="UpdateNuspecDependencies"

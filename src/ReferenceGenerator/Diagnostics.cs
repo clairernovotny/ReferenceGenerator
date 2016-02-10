@@ -56,6 +56,7 @@ namespace ReferenceGenerator
         }
 
         public static readonly WarningWithMessage ClassicPclUnix = new WarningWithMessage("Classic PCL's, including Profile 259, cannot be updated on non-Windows Operating Systems. No changes have been made.", "RG002");
+      
     }
 
     class Error : Diagnostic
@@ -70,8 +71,14 @@ namespace ReferenceGenerator
     {
         public ErrorWithMessage(Exception ex) : base("RG001")
         {
-
             Message = ex.Message;
         }
+
+        public ErrorWithMessage(string message, string code) : base(code)
+        {
+            Message = message;
+        }
+
+        public static readonly ErrorWithMessage TargetFrameworkNotFound = new ErrorWithMessage("TargetFrameworkName is not recognized as a PCL or package based framework. Specify NuSpecTfm instead of using 'auto'", "RG003");
     }
 }

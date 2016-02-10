@@ -21,8 +21,8 @@ namespace ReferenceGenerator
 
         private static int Main(string[] args)
         {
-            // args 0: NuGetTargetMonikers -- .NETPlatform,Version=v5.0  
-            // args 1: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0 
+            // args 0: NuGetTargetMonikers -- .NETStandard,Version=v1.4  
+            // args 1: TFM's to generate, semi-colon joined. E.g.: auto;uap10.0 
             // args 2: nuspec file
             // args 3: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
             // args 4: target files, semi-colon joined
@@ -35,7 +35,7 @@ namespace ReferenceGenerator
                                                  .ToArray();
                 var tfms = args[1].Split(';')
                                   .Where(s => !string.IsNullOrWhiteSpace(s))
-                                  .Select(NuGetFramework.Parse)
+                                  .Select( NuGetFramework.Parse)
                                   .ToArray();
 
                 var nuspecFile = args[2];
@@ -49,6 +49,37 @@ namespace ReferenceGenerator
 
                 var microsoftRefs = new[] {"Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives"};
                 MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
+
+
+
+                // calc target for PCL profiles
+                var firstTfm = nugetTargetMonikers.FirstOrDefault();
+                if (firstTfm != null)
+                {
+                    for (var i = 0; i < tfms.Length; i++)
+                    {
+                        // look for an unsupported TFM and calc the result
+                        if (!tfms[i].IsUnsupported)
+                            continue;
+
+                        if (firstTfm.IsPCL)
+                        {
+                            var profileVer = int.Parse(nugetTargetMonikers[0].Profile.Substring(7), CultureInfo.InvariantCulture);
+                            // map the PCL profile to a netstandard target
+                            tfms[i] = DefaultPortableFrameworkMappings.Instance.CompatibilityMappings.First(t => t.Key == profileVer).Value.Max;
+                        }
+                        else if (firstTfm.IsPackageBased)
+                        {
+                            tfms[i] = firstTfm;
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine(ErrorWithMessage.TargetFrameworkNotFound);
+                        }
+                    }
+                }
+              
+                
 
 
                 var packages = new List<Package>();
