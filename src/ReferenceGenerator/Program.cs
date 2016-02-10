@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -12,6 +13,7 @@ using System.Xml.XPath;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
+using ReferenceGenerator.Properties;
 
 namespace ReferenceGenerator
 {
@@ -298,7 +300,7 @@ namespace ReferenceGenerator
                 results.AddRange(GetPackagesFromAssemblyRefs(toAdd));
             }
             
-            return results;
+            return ApplyBaselinePackageVersions(results);
         }
 
         static IEnumerable<Package> GetPackagesConfigPackages(string projectFile, string packagesConfig, IEnumerable<Reference> assemblyRefs)
@@ -387,8 +389,7 @@ namespace ReferenceGenerator
                 }
             }
 
-            return packages;
-            
+            return ApplyBaselinePackageVersions(packages);
         }
 
         static readonly string PortableDir = GetPortableDirWindows();
@@ -421,6 +422,25 @@ namespace ReferenceGenerator
         {
             // These should only be system ones
             return refs.Select(r => new Package(r.Name, r.Version.ToString(3)));
+        }
+
+        static IEnumerable<Package> ApplyBaselinePackageVersions(IEnumerable<Package> packages)
+        {
+            var blp = BaseLinePackages.Value;
+            foreach (var package in packages)
+            {
+                Package baseline;
+                if (blp.TryGetValue(package.Id, out baseline))
+                {
+                    // baseline knows about the package, make sure we use the higher ver
+                    yield return (baseline.Version > package.Version ? baseline : package);
+                    
+                }
+                else
+                {
+                    yield return package;
+                }
+            }
         }
 
         static XElement GetOrCreateDependenciesNode(XDocument doc, XNamespace nuspecNs)
@@ -464,6 +484,23 @@ namespace ReferenceGenerator
         }
 
         static bool IsWindows => Environment.OSVersion.Platform == PlatformID.Win32NT;
+
+        static Dictionary<string, Package> LoadBaselinePackagesFromResources()
+        {
+            using (var sr = new StreamReader(new MemoryStream(Resources.baseline_packages)))
+            {
+                var doc = XDocument.Load(sr);
+
+                var ns = doc.Root.Name.Namespace;
+                var baseLineNodes = doc.Descendants(ns + "BaseLinePackage");
+                var packageEnum = baseLineNodes.Select(p => new Package(p.Attribute("Include").Value, p.Element(ns + "Version").Value));
+
+                return packageEnum.ToDictionary(k => k.Id);
+
+            }
+        }
+
+        static readonly Lazy<Dictionary<string, Package>> BaseLinePackages = new Lazy<Dictionary<string, Package>>(LoadBaselinePackagesFromResources);
         
     }
 
