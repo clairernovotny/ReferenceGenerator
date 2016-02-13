@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Diagnostics.cs" />
+    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="FrameworkList.cs" />
     <Compile Include="FrameworkListCollection.cs" />
     <Compile Include="Package.cs" />

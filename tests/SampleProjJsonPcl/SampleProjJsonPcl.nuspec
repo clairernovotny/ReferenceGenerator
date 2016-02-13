@@ -13,6 +13,30 @@
         <dependency id="System.Resources.ResourceManager" version="4.0.1" />
         <dependency id="System.Runtime" version="4.0.21" />
       </group>
+      <group targetFramework="net45">
+        <dependency id="FluentAssertions" version="4.2.2" />
+      </group>
+      <group targetFramework="monoandroid">
+        <dependency id="FluentAssertions" version="4.2.2" />
+      </group>
+      <group targetFramework="monotouch">
+        <dependency id="FluentAssertions" version="4.2.2" />
+      </group>
+      <group targetFramework="win8">
+        <dependency id="FluentAssertions" version="4.2.2" />
+      </group>
+      <group targetFramework="wp8">
+        <dependency id="FluentAssertions" version="4.2.2" />
+      </group>
+      <group targetFramework="wpa81">
+        <dependency id="FluentAssertions" version="4.2.2" />
+      </group>
+      <group targetFramework="xamarinios">
+        <dependency id="FluentAssertions" version="4.2.2" />
+      </group>
+      <group targetFramework="xamarinmac">
+        <dependency id="FluentAssertions" version="4.2.2" />
+      </group>
     </dependencies>
   </metadata>
 </package>

@@ -32,28 +32,6 @@ namespace ReferenceGenerator
             return ThisAssemblyFrameworks.Contains(framework);
         }
 
-        //public static NuGetFramework ContainsFramework(NuGetFramework framework)
-        //{
-        //    // Needs to find the nearest matching one if we have one
-        //    // find matching string based on framework
-        //    var resource = (from res in ThisAssemblyResources
-        //                   where res.Contains($"{framework.Framework}_")
-        //                   select res).FirstOrDefault();
-
-        //    if (resource == null)
-        //        return null;
-
-        //    var fx = FromResourceString(resource);
-
-
-        //    // if version is 0, use the matching one
-        //    if (framework.Version.Major == 0 && framework.Version.Minor == 0)
-        //    {
-
-        //    }
-
-        //}
-
         static NuGetFramework FromResourceString(string resource)
         {
             var fxStr = resource.Substring(ResourceRoot.Length);
@@ -68,15 +46,22 @@ namespace ReferenceGenerator
 
         static string ResourceNameFromNuGetFramework(NuGetFramework framework)
         {
-            var tfm = framework.DotNetFrameworkName;
-            var resourceSafeString = tfm.Replace(',', '_')
-                                        .Replace('=', '_')
-                                        .Replace(".", "._");
-
+            var resourceSafeString = $"{framework.Framework}_Version_v{framework.Version.GetDisplayVersion().Replace(".", "._")}";
+            
             return resourceSafeString;
         }
 
-        public static FrameworkList GetFrameworkList(NuGetFramework framework) => FrameworkLists.GetOrAdd(framework, CreateFrameworkList);
+        public static FrameworkList GetFrameworkList(NuGetFramework framework)
+        {
+
+            // if framework ver is 0, find matching one
+            if (framework.Version.Major == 0 && framework.Version.Minor == 0)
+            {
+                framework = ThisAssemblyFrameworks.First(fx => fx.Framework == framework.Framework);
+            }
+
+            return FrameworkLists.GetOrAdd(framework, CreateFrameworkList);
+        }
 
         static FrameworkList CreateFrameworkList(NuGetFramework framework)
         {

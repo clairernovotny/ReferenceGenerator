@@ -172,28 +172,33 @@ namespace ReferenceGenerator
             }
         }
 
-        static  IEnumerable<Tuple<NuGetFramework, IEnumerable<PackageWithReference>>> SquashBuiltInPackages(IEnumerable<PackageWithReference> package, NuGetFramework framework)
+        static  IEnumerable<Tuple<NuGetFramework, IEnumerable<PackageWithReference>>> SquashBuiltInPackages(IReadOnlyList<PackageWithReference> packages, NuGetFramework framework)
         {
             // This method will calculate compatible NuGetFrameworks where the input can run on and then trim the package list based on what's in-box
 
             if (framework.IsPackageBased)
             {
                 // Return the package-based group untouched
-                yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(framework, package);
+                yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(framework, packages);
                 foreach (var fx in CompatibilityListProvider.Default.GetFrameworksSupporting(framework))
                 {
                     if (!FrameworkListCollection.Contains(fx))
                         continue;
 
-                    Console.WriteLine(fx);
-                }
-                Console.ReadKey();
-                
+                    var frameworkList = FrameworkListCollection.GetFrameworkList(fx);
 
+
+                    // Filter down the packages if based on the frameworklist
+                    var toDrop = packages.Where(p => frameworkList.ContainsReference(p.Reference)).ToList();
+
+                    var filtered = packages.Except(toDrop).OrderBy(p => p.Id).ToList();
+                    
+                    yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(fx, filtered);
+                }
             }
             else
             {
-                yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(framework, package);
+                yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(framework, packages);
             }
         }
 
@@ -445,22 +450,10 @@ namespace ReferenceGenerator
                 throw new UnixNotSupportedException();
             }
 
-            var filePath = Path.Combine(PortableDir, $"v{GetDisplayVersion(framework.Version)}", "Profile", framework.Profile, $"{assemblyName}.dll");
+            var filePath = Path.Combine(PortableDir, $"v{framework.Version.GetDisplayVersion()}", "Profile", framework.Profile, $"{assemblyName}.dll");
             return File.Exists(filePath);
         }
-
-        static string GetDisplayVersion(Version version)
-        {
-            var stringBuilder = new StringBuilder(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major,version.Minor));
-            if (version.Build > 0 || version.Revision > 0)
-            {
-                stringBuilder.AppendFormat(CultureInfo.InvariantCulture, ".{0}", version.Build);
-                if (version.Revision > 0)
-                    stringBuilder.AppendFormat(CultureInfo.InvariantCulture, ".{0}", version.Revision);
-            }
-            return stringBuilder.ToString();
-        }
-
+        
         static IEnumerable<PackageWithReference> GetPackagesFromAssemblyRefs(IEnumerable<Reference> refs)
         {
             // These should only be system ones
