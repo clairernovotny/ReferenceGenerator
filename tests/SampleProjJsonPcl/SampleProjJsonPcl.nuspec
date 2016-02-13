@@ -8,6 +8,7 @@
     <description>My package description.</description>
     <dependencies>
       <group targetFramework="netstandard1.0">
+        <dependency id="FluentAssertions" version="4.2.2" />
         <dependency id="System.Net.Requests" version="4.0.11" />
         <dependency id="System.Resources.ResourceManager" version="4.0.1" />
         <dependency id="System.Runtime" version="4.0.21" />

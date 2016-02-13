@@ -84,7 +84,7 @@ namespace ReferenceGenerator
                 
 
 
-                var packages = new List<Package>();
+                var packages = new List<PackageWithReference>();
 
                 for (var i = 0; i < projectFiles.Length; i++)
                 {
@@ -159,7 +159,7 @@ namespace ReferenceGenerator
             }
         }
 
-        static void UpdateNuspecFile(string nuspecFile, IReadOnlyList<Package> packages, IEnumerable<NuGetFramework> tfms)
+        static void UpdateNuspecFile(string nuspecFile, IReadOnlyList<PackageWithReference> packages, IEnumerable<NuGetFramework> tfms)
         {
             // Takes the input TFMs that the user specified and writes. For portable, we squash "inbox" references and then apply baseline updates
             foreach (var tfm in tfms)
@@ -172,22 +172,28 @@ namespace ReferenceGenerator
             }
         }
 
-        static  IEnumerable<Tuple<NuGetFramework, IEnumerable<Package>>> SquashBuiltInPackages(IEnumerable<Package> package, NuGetFramework framework)
+        static  IEnumerable<Tuple<NuGetFramework, IEnumerable<PackageWithReference>>> SquashBuiltInPackages(IEnumerable<PackageWithReference> package, NuGetFramework framework)
         {
             // This method will calculate compatible NuGetFrameworks where the input can run on and then trim the package list based on what's in-box
 
             if (framework.IsPackageBased)
             {
+                // Return the package-based group untouched
+                yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(framework, package);
                 foreach (var fx in CompatibilityListProvider.Default.GetFrameworksSupporting(framework))
                 {
+                    if (!FrameworkListCollection.Contains(fx))
+                        continue;
+
                     Console.WriteLine(fx);
                 }
+                Console.ReadKey();
                 
 
             }
             else
             {
-                yield return new Tuple<NuGetFramework, IEnumerable<Package>>(framework, package);
+                yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(framework, package);
             }
         }
 
@@ -251,7 +257,7 @@ namespace ReferenceGenerator
             xdoc.Save(nuspecFile, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error
         }
 
-        static IEnumerable<Package> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, NuGetFramework[] nugetTargetMonikers)
+        static IEnumerable<PackageWithReference> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, NuGetFramework[] nugetTargetMonikers)
         {
             // This needs to load the project.lock.json, look for the reference under the 
             // targets -> ".NETPlatform,Version=v5.0", look for each package and the files in it, then pull out based on refs
@@ -312,7 +318,7 @@ namespace ReferenceGenerator
 
             var results = (from assmRef in refs
                            join kvp in assmToPackage on assmRef.Name equals kvp.Key
-                           select kvp.Value).ToList();
+                           select new PackageWithReference(kvp.Value.Id, kvp.Value.VersionString, assmRef)).ToList();
             
 
             if (chosenTfm.IsPCL)
@@ -340,7 +346,7 @@ namespace ReferenceGenerator
             return results;
         }
 
-        static IEnumerable<Package> GetPackagesConfigPackages(string projectFile, string packagesConfig, IEnumerable<Reference> assemblyRefs)
+        static IEnumerable<PackageWithReference> GetPackagesConfigPackages(string projectFile, string packagesConfig, IEnumerable<Reference> assemblyRefs)
         {
             // For projects that uses packages.config, we need to do a few things:
             // 1. Read the packages from the config file
@@ -379,7 +385,7 @@ namespace ReferenceGenerator
             var otherRefs = assemblyRefs.Except(sysRefs).ToList();
 
             // for sys refs, we use the assm ver
-            var packages = new HashSet<Package>(GetPackagesFromAssemblyRefs(sysRefs));
+            var packages = new HashSet<PackageWithReference>(GetPackagesFromAssemblyRefs(sysRefs));
 
             if(otherRefs.Count > 0)
             {
@@ -411,7 +417,7 @@ namespace ReferenceGenerator
                                let startIndex = hintPath?.IndexOf("packages\\", StringComparison.OrdinalIgnoreCase) + 9 ?? -1
                                let endIndex = hintPath?.IndexOf('\\', startIndex) ?? -1
                                let packageDir = hintPath?.Substring(startIndex, endIndex - startIndex) ?? null
-                               select new { Assembly = assm, PackageDir = packageDir })
+                               select new { Assembly = assm, PackageDir = packageDir, Reference = otherRefs.FirstOrDefault(r => r.Name.Equals(assm, StringComparison.OrdinalIgnoreCase)) })
                                .ToList();
 
 
@@ -421,7 +427,7 @@ namespace ReferenceGenerator
                     Package p;
                     if(packageMap.TryGetValue(projRef.PackageDir, out p))
                     {
-                        packages.Add(p);
+                        packages.Add(new PackageWithReference(p.Id, p.VersionString, projRef.Reference));
                     }
                 }
             }
@@ -455,10 +461,10 @@ namespace ReferenceGenerator
             return stringBuilder.ToString();
         }
 
-        static IEnumerable<Package> GetPackagesFromAssemblyRefs(IEnumerable<Reference> refs)
+        static IEnumerable<PackageWithReference> GetPackagesFromAssemblyRefs(IEnumerable<Reference> refs)
         {
             // These should only be system ones
-            return refs.Select(r => new Package(r.Name, r.Version.ToString(3)));
+            return refs.Select(r => new PackageWithReference(r.Name, r.Version.ToString(3), r));
         }
 
         static IEnumerable<Package> ApplyBaselinePackageVersions(IEnumerable<Package> packages)
@@ -524,17 +530,13 @@ namespace ReferenceGenerator
 
         static Dictionary<string, Package> LoadBaselinePackagesFromResources()
         {
-            using (var sr = new StreamReader(new MemoryStream(Resources.baseline_packages)))
-            {
-                var doc = XDocument.Load(sr);
+            var doc = XDocument.Parse(Resources.baseline_packages);
 
-                var ns = doc.Root.Name.Namespace;
-                var baseLineNodes = doc.Descendants(ns + "BaseLinePackage");
-                var packageEnum = baseLineNodes.Select(p => new Package(p.Attribute("Include").Value, p.Element(ns + "Version").Value));
+            var ns = doc.Root.Name.Namespace;
+            var baseLineNodes = doc.Descendants(ns + "BaseLinePackage");
+            var packageEnum = baseLineNodes.Select(p => new Package(p.Attribute("Include").Value, p.Element(ns + "Version").Value));
 
-                return packageEnum.ToDictionary(k => k.Id);
-
-            }
+            return packageEnum.ToDictionary(k => k.Id);
         }
 
         static readonly Lazy<Dictionary<string, Package>> BaseLinePackages = new Lazy<Dictionary<string, Package>>(LoadBaselinePackagesFromResources);

@@ -61,12 +61,37 @@ namespace ReferenceGenerator.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;Project ToolsVersion=&quot;12.0&quot; DefaultTargets=&quot;Build&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
+        ///&lt;!-- From https://github.com/dotnet/buildtools/blob/master/src/Microsoft.DotNet.Build.Tasks.Packaging/src/PackageFiles/baseline.packages.targets --&gt;
+        ///  &lt;ItemGroup&gt;
+        ///    &lt;BaseLinePackage Include=&quot;Microsoft.CSharp&quot;&gt;
+        ///      &lt;Version&gt;4.0.1&lt;/Version&gt;
+        ///    &lt;/BaseLinePackage&gt;
+        ///    &lt;BaseLinePackage Include=&quot;Microsoft.VisualBasic&quot;&gt;
+        ///      &lt;Version&gt;10.0.1&lt;/Version&gt;        /// [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static byte[] baseline_packages {
+        internal static string baseline_packages {
             get {
-                object obj = ResourceManager.GetObject("baseline_packages", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("baseline_packages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;FileList&gt;
+        ///  &lt;!-- this lists the highest stable version of a contract at the point
+        ///       in which we switched from contract versioning (eg: 4.0.API.0) to
+        ///       semantic versioning (eg: 4.API.Bugfix.servicing).  --&gt;
+        ///
+        ///  &lt;File AssemblyName=&quot;Microsoft.CSharp&quot; Version=&quot;4.0.0.0&quot; /&gt;
+        ///  &lt;File AssemblyName=&quot;Microsoft.VisualBasic&quot; Version=&quot;10.0.0.0&quot; /&gt;
+        ///  &lt;File AssemblyName=&quot;Microsoft.Win32.Primitives&quot; Version=&quot;4.0.0.0&quot; /&gt;
+        ///  &lt;File AssemblyName=&quot;System.AppContext&quot; Versio [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string LastNonSemanticVersions {
+            get {
+                return ResourceManager.GetString("LastNonSemanticVersions", resourceCulture);
             }
         }
     }
