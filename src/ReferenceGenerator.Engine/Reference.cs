@@ -14,17 +14,9 @@ namespace ReferenceGenerator.Engine
             Version = version;
         }
 
-        public string Name
-        {
-            get;
-            private set;
-        }
+        public string Name { get; }
 
-        public Version Version
-        {
-            get;
-            private set;
-        }
+        public Version Version { get; }
 
         public bool Equals(Reference other)
         {

@@ -8,11 +8,11 @@ namespace ReferenceGenerator.Engine
 {
     public class PackageWithReference : Package
     {
-        public Reference Reference { get; private set; }
-
         public PackageWithReference(string id, string version, Reference reference) : base(id, version)
         {
             Reference = reference;
         }
+
+        public Reference Reference { get; private set; }
     }
 }

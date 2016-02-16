@@ -9,6 +9,5 @@ namespace ReferenceGenerator.Engine
     [Serializable]
     public class UnixNotSupportedException : Exception
     {
-
     }
 }

@@ -16,25 +16,14 @@ namespace ReferenceGenerator.Engine
             VersionString = version;
         }
 
-        public string Id
-        {
-            get;
-            private set;
-        }
+        public string Id { get; }
 
         // This needs a SemVer comparer for sorting
-        public SemanticVersion Version
-        {
-            get;
-            private set;
-        }
+        public SemanticVersion Version { get; }
 
         // we use the string for round-tripping
-        public string VersionString
-        {
-            get; private set;
-        }
-            
+        public string VersionString { get; }
+
 
         public int CompareTo(Package other)
         {

@@ -9,9 +9,9 @@ namespace ReferenceGenerator.Engine
 {
     public class FrameworkList
     {
-        readonly HashSet<Reference> references = new HashSet<Reference>(Comparer);
         static readonly ReferenceEqualityComparer Comparer = new ReferenceEqualityComparer();
         static readonly Version Zero = new Version(0, 0, 0, 0);
+        readonly HashSet<Reference> references = new HashSet<Reference>(Comparer);
 
         public FrameworkList(IEnumerable<XElement> fileNodes)
         {
@@ -38,8 +38,8 @@ namespace ReferenceGenerator.Engine
                 var fxRef = references.First(r => Comparer.Equals(r, reference));
 
                 // If rx ref is zero, match all, otherwise check ver
-                if(fxRef.Version.Equals(Zero) || fxRef.Version >= reference.Version)
-                    return true; 
+                if (fxRef.Version.Equals(Zero) || fxRef.Version >= reference.Version)
+                    return true;
             }
 
             return false;
@@ -59,6 +59,5 @@ namespace ReferenceGenerator.Engine
                 return obj.Name.GetHashCode();
             }
         }
-
     }
 }

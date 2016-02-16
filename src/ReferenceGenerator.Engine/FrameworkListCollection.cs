@@ -31,28 +31,8 @@ namespace ReferenceGenerator.Engine
             return ThisAssemblyFrameworks.Contains(framework);
         }
 
-        static NuGetFramework FromResourceString(string resource)
-        {
-            var fxStr = resource.Substring(ResourceRoot.Length);
-            fxStr = fxStr.Substring(0, fxStr.LastIndexOf('.', fxStr.Length - 5));
-
-            fxStr = fxStr.Replace("_Version_", ",Version=")
-                         .Replace("._", ".");
-
-            return NuGetFramework.Parse(fxStr);
-
-        }
-
-        static string ResourceNameFromNuGetFramework(NuGetFramework framework)
-        {
-            var resourceSafeString = $"{framework.Framework}_Version_v{framework.Version.GetDisplayVersion().Replace(".", "._")}";
-            
-            return resourceSafeString;
-        }
-
         public static FrameworkList GetFrameworkList(NuGetFramework framework)
         {
-
             // if framework ver is 0, find matching one
             if (framework.Version.Major == 0 && framework.Version.Minor == 0)
             {
@@ -87,6 +67,24 @@ namespace ReferenceGenerator.Engine
             }
 
             return new FrameworkList(nodes);
+        }
+
+        static NuGetFramework FromResourceString(string resource)
+        {
+            var fxStr = resource.Substring(ResourceRoot.Length);
+            fxStr = fxStr.Substring(0, fxStr.LastIndexOf('.', fxStr.Length - 5));
+
+            fxStr = fxStr.Replace("_Version_", ",Version=")
+                         .Replace("._", ".");
+
+            return NuGetFramework.Parse(fxStr);
+        }
+
+        static string ResourceNameFromNuGetFramework(NuGetFramework framework)
+        {
+            var resourceSafeString = $"{framework.Framework}_Version_v{framework.Version.GetDisplayVersion() .Replace(".", "._")}";
+
+            return resourceSafeString;
         }
     }
 }

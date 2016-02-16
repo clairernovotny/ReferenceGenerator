@@ -1,17 +1,13 @@
 ﻿using System;
+using System.Xml.XPath;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using System.Xml.XPath;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
 using ReferenceGenerator.Engine;
 
@@ -19,6 +15,34 @@ namespace ReferenceGenerator
 {
     class Program
     {
+        static XElement CreateDependencyElement(NuGetFramework tfm, IEnumerable<Package> refs, XNamespace nuspecNs)
+        {
+            var ele = new XElement(nuspecNs + "group", new XAttribute("targetFramework", tfm.GetShortFolderName()),
+                                   refs.Select(r =>
+                                               new XElement(nuspecNs + "dependency",
+                                                            new XAttribute("id", r.Id),
+                                                            new XAttribute("version", $"{r.VersionString}")
+                                                   )));
+
+            return ele;
+        }
+
+        static XElement GetOrCreateDependenciesNode(XDocument doc, XNamespace nuspecNs)
+        {
+            var mde = doc.Root.Element(nuspecNs + "metadata");
+            if (mde == null)
+                throw new ArgumentException("NuSpec XML namespaces are not correctly formed. Ensure the xmlns is on the root package element", nameof(doc));
+
+            var deps = mde.Element(nuspecNs + "dependencies");
+
+            if (deps == null)
+            {
+                deps = new XElement(nuspecNs + "dependencies");
+                mde.Add(deps);
+            }
+
+            return deps;
+        }
 
         private static int Main(string[] args)
         {
@@ -36,7 +60,7 @@ namespace ReferenceGenerator
                                                  .ToArray();
                 var tfms = args[1].Split(';')
                                   .Where(s => !string.IsNullOrWhiteSpace(s))
-                                  .Select( NuGetFramework.Parse)
+                                  .Select(NuGetFramework.Parse)
                                   .ToArray();
 
                 var nuspecFile = args[2];
@@ -63,7 +87,8 @@ namespace ReferenceGenerator
                         {
                             var profileVer = int.Parse(nugetTargetMonikers[0].Profile.Substring(7), CultureInfo.InvariantCulture);
                             // map the PCL profile to a netstandard target
-                            tfms[i] = DefaultPortableFrameworkMappings.Instance.CompatibilityMappings.First(t => t.Key == profileVer).Value.Max;
+                            tfms[i] = DefaultPortableFrameworkMappings.Instance.CompatibilityMappings.First(t => t.Key == profileVer)
+                                                                      .Value.Max;
                         }
                         else if (firstTfm.IsPackageBased)
                         {
@@ -75,14 +100,12 @@ namespace ReferenceGenerator
                         }
                     }
                 }
-                
 
 
                 var packages = new List<PackageWithReference>();
 
                 for (var i = 0; i < projectFiles.Length; i++)
                 {
-
                     var assm = AssemblyInfo.GetAssemblyInfo(files[i]);
                     var projectFileName = Path.GetFileNameWithoutExtension(projectFiles[i]);
 
@@ -152,23 +175,23 @@ namespace ReferenceGenerator
             // Takes the input TFMs that the user specified and writes. For portable, we squash "inbox" references and then apply baseline updates
             foreach (var tfm in tfms)
             {
-                foreach(var tuple in ProjectEngine.SquashBuiltInPackages(packages, tfm))
+                foreach (var tuple in ProjectEngine.SquashBuiltInPackages(packages, tfm))
                 {
-                    var baselined = ProjectEngine.ApplyBaselinePackageVersions(tuple.Item2).ToList();
+                    var baselined = ProjectEngine.ApplyBaselinePackageVersions(tuple.Item2)
+                                                 .ToList();
                     UpdateNuSpecFileForTfm(nuspecFile, baselined, tuple.Item1);
                 }
             }
         }
 
         /// <summary>
-        /// Writes a specific TFM and its packages into the nuspec file
+        ///     Writes a specific TFM and its packages into the nuspec file
         /// </summary>
         /// <param name="nuspecFile"></param>
         /// <param name="framework"></param>
         /// <param name="packages"></param>
         static void UpdateNuSpecFileForTfm(string nuspecFile, IReadOnlyList<Package> packages, NuGetFramework framework)
         {
-            
             var refNames = new HashSet<string>(packages.Select(g => g.Id), StringComparer.OrdinalIgnoreCase);
 
 
@@ -182,7 +205,8 @@ namespace ReferenceGenerator
             var xdoc = XDocument.Load(nuspecFile);
 
             // get the default namespace
-            var name = xdoc.Root.Attribute("xmlns")?.Value ?? string.Empty;
+            var name = xdoc.Root.Attribute("xmlns")
+                          ?.Value ?? string.Empty;
             nsm.AddNamespace("ns", name);
 
             XNamespace nuspecNs = name;
@@ -190,7 +214,7 @@ namespace ReferenceGenerator
 
             var deps = GetOrCreateDependenciesNode(xdoc, nuspecNs);
 
-         
+
             var ele = CreateDependencyElement(framework, packages, nuspecNs);
 
             // see if we have a node with this tfm
@@ -200,8 +224,9 @@ namespace ReferenceGenerator
                 // Need to merge
                 // find nodes that match by name, remove and then readd them
                 var existing = grp.Elements(nuspecNs + "dependency")
-                                    .Where(e => refNames.Contains(e.Attribute("id").Value))
-                                    .ToList();
+                                  .Where(e => refNames.Contains(e.Attribute("id")
+                                                                 .Value))
+                                  .ToList();
 
                 foreach (var xe in existing)
                 {
@@ -215,38 +240,9 @@ namespace ReferenceGenerator
             {
                 deps.Add(ele);
             }
-            
+
 
             xdoc.Save(nuspecFile, SaveOptions.OmitDuplicateNamespaces); // TODO: handle read-only files and return error
-        }
-
-        static XElement GetOrCreateDependenciesNode(XDocument doc, XNamespace nuspecNs)
-        {
-            var mde = doc.Root.Element(nuspecNs + "metadata");
-            if (mde == null)
-                throw new ArgumentException("NuSpec XML namespaces are not correctly formed. Ensure the xmlns is on the root package element", nameof(doc));
-
-            var deps = mde.Element(nuspecNs + "dependencies");
-
-            if (deps == null)
-            {
-                deps = new XElement(nuspecNs + "dependencies");
-                mde.Add(deps);
-            }
-
-            return deps;
-        }
-
-        static XElement CreateDependencyElement(NuGetFramework tfm, IEnumerable<Package> refs, XNamespace nuspecNs)
-        {
-            var ele = new XElement(nuspecNs + "group", new XAttribute("targetFramework", tfm.GetShortFolderName()),
-                refs.Select(r =>
-                    new XElement(nuspecNs + "dependency",
-                        new XAttribute("id", r.Id),
-                        new XAttribute("version", $"{r.VersionString}")
-                                )));
-
-            return ele;
         }
     }
 }

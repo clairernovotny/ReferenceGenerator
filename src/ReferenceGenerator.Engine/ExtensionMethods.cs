@@ -20,6 +20,5 @@ namespace ReferenceGenerator.Engine
             }
             return stringBuilder.ToString();
         }
-
     }
 }

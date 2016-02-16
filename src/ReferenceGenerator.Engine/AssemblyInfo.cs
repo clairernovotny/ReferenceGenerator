@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Reflection.Metadata;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
 
@@ -10,7 +10,7 @@ namespace ReferenceGenerator.Engine
 {
     public class AssemblyInfo
     {
-        private AssemblyInfo(string path, string name, Version version, Reference[] references)
+        AssemblyInfo(string path, string name, Version version, Reference[] references)
         {
             Path = path;
             Name = name;
@@ -18,28 +18,13 @@ namespace ReferenceGenerator.Engine
             References = references;
         }
 
-        public string Path
-        {
-            get;
-            private set;
-        }
+        public string Name { get; private set; }
 
-        public string Name
-        {
-            get;
-            private set;
-        }
+        public string Path { get; private set; }
 
-        public Version Version
-        {
-            get; private set;
-        }
+        public Reference[] References { get; private set; }
 
-        public Reference[] References
-        {
-            get;
-            private set;
-        }
+        public Version Version { get; private set; }
 
         public static AssemblyInfo GetAssemblyInfo(string path)
         {
@@ -56,7 +41,7 @@ namespace ReferenceGenerator.Engine
             }
         }
 
-        private static Reference[] GetAssemblyReferences(MetadataReader reader)
+        static Reference[] GetAssemblyReferences(MetadataReader reader)
         {
             var references = new List<Reference>();
 
@@ -68,6 +53,5 @@ namespace ReferenceGenerator.Engine
 
             return references.ToArray();
         }
-
     }
 }
