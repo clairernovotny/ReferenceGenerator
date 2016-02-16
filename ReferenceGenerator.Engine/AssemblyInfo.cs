@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Threading.Tasks;
 
-namespace ReferenceGenerator
+namespace ReferenceGenerator.Engine
 {
     public class AssemblyInfo
     {

@@ -4,17 +4,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using NuGet.Frameworks;
 
-namespace ReferenceGenerator
+namespace ReferenceGenerator.Engine
 {
     public static class FrameworkListCollection
     {
-        const string ResourceRoot = "ReferenceGenerator.Res.";
+        const string ResourceRoot = "ReferenceGenerator.Engine.Res.";
         static readonly Assembly ThisAssembly = typeof(FrameworkListCollection).Assembly;
         static readonly string[] ThisAssemblyResources = ThisAssembly.GetManifestResourceNames();
         static readonly HashSet<NuGetFramework> ThisAssemblyFrameworks = new HashSet<NuGetFramework>(ThisAssemblyResources.Select(FromResourceString));

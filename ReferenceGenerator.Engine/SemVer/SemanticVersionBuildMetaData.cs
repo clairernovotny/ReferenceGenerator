@@ -1,11 +1,14 @@
-﻿namespace GitVersion
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+namespace ReferenceGenerator.Engine.SemVer
 {
     // From the GitVersion project https://github.com/GitTools/GitVersion
     // MIT License - Copyright (c) 2013 NServiceBus Ltd
-
-    using System;
-    using System.Text.RegularExpressions;
-
+    
     public class SemanticVersionBuildMetaData : IFormattable, IEquatable<SemanticVersionBuildMetaData>
     {
         static Regex ParseRegex = new Regex(

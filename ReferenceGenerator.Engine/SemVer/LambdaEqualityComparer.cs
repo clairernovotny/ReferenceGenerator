@@ -1,7 +1,10 @@
-﻿namespace GitVersion
-{
-    using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
+namespace ReferenceGenerator.Engine.SemVer
+{
     // From the LibGit2Sharp project (libgit2sharp.com)
     // MIT License - Copyright (c) 2011-2014 LibGit2Sharp contributors
     // see https://github.com/libgit2/libgit2sharp/blob/7af5c60f22f9bd6064204f84467cfa62bedd1147/LibGit2Sharp/Core/LambdaEqualityHelper.cs

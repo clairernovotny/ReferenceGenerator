@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReferenceGenerator
+namespace ReferenceGenerator.Engine
 {
     public static class ExtensionMethods
     {

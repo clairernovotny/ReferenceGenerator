@@ -9,7 +9,7 @@ using System.Xml.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
-using ReferenceGenerator.Properties;
+using ReferenceGenerator.Engine.Properties;
 
 namespace ReferenceGenerator.Engine
 {

@@ -1,14 +1,15 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
-namespace GitVersion
+namespace ReferenceGenerator.Engine.SemVer
 {
     // From the GitVersion project https://github.com/GitTools/GitVersion
     // MIT License - Copyright (c) 2013 NServiceBus LtdLtd
-
-    using System;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-
+    
     public class SemanticVersionPreReleaseTag :
         IFormattable, IComparable<SemanticVersionPreReleaseTag>, IEquatable<SemanticVersionPreReleaseTag>
     {

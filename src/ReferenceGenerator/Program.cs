@@ -14,13 +14,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
 using ReferenceGenerator.Engine;
-using ReferenceGenerator.Properties;
 
 namespace ReferenceGenerator
 {
     class Program
     {
-        static HashSet<string> MicrosoftRefs;
 
         private static int Main(string[] args)
         {
@@ -49,10 +47,6 @@ namespace ReferenceGenerator
                 var files = args[4].Split(';')
                                    .Where(s => !string.IsNullOrWhiteSpace(s))
                                    .ToArray();
-
-                var microsoftRefs = new[] {"Microsoft.CSharp", "Microsoft.VisualBasic", "Microsoft.Win32.Primitives"};
-                MicrosoftRefs = new HashSet<string>(microsoftRefs, StringComparer.OrdinalIgnoreCase);
-
 
 
                 // calc target for PCL profiles
