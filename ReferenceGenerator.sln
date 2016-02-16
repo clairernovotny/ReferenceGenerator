@@ -33,7 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleNetStandard11Library"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Libraries", "Test Libraries", "{9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReferenceGenerator.Engine", "ReferenceGenerator.Engine\ReferenceGenerator.Engine.csproj", "{3355807C-CA78-4B0C-8EFA-5015CAED676C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReferenceGenerator.Engine", "src\ReferenceGenerator.Engine\ReferenceGenerator.Engine.csproj", "{3355807C-CA78-4B0C-8EFA-5015CAED676C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

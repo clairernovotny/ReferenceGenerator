@@ -61,7 +61,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ReferenceGenerator.Engine\ReferenceGenerator.Engine.csproj">
+    <ProjectReference Include="..\ReferenceGenerator.Engine\ReferenceGenerator.Engine.csproj">
       <Project>{3355807c-ca78-4b0c-8efa-5015caed676c}</Project>
       <Name>ReferenceGenerator.Engine</Name>
     </ProjectReference>
