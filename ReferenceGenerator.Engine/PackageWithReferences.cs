@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ReferenceGenerator
 {
-    class PackageWithReference : Package
+    public class PackageWithReference : Package
     {
         public Reference Reference { get; private set; }
 

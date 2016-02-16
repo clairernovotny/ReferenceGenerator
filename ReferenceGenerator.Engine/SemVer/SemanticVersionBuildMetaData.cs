@@ -6,7 +6,7 @@
     using System;
     using System.Text.RegularExpressions;
 
-    internal class SemanticVersionBuildMetaData : IFormattable, IEquatable<SemanticVersionBuildMetaData>
+    public class SemanticVersionBuildMetaData : IFormattable, IEquatable<SemanticVersionBuildMetaData>
     {
         static Regex ParseRegex = new Regex(
             @"(?<BuildNumber>\d+)?(\.?Branch(Name)?\.(?<BranchName>[^\.]+))?(\.?Sha?\.(?<Sha>[^\.]+))?(?<Other>.*)",

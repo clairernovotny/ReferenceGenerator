@@ -1,5 +1,9 @@
 ﻿{
     "dependencies": {
+        "Newtonsoft.Json": "8.0.2",
+        "NuGet.Packaging": "3.4.0-beta-*",
+        "System.Reflection.Metadata": "1.1.0"
+
     },
     "frameworks": {
         "net45": { }

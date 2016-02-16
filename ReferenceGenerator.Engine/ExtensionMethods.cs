@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace ReferenceGenerator
 {
-    static class ExtensionMethods
+    public static class ExtensionMethods
     {
-        internal static string GetDisplayVersion(this Version version)
+        public static string GetDisplayVersion(this Version version)
         {
             var stringBuilder = new StringBuilder(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor));
             if (version.Build > 0 || version.Revision > 0)

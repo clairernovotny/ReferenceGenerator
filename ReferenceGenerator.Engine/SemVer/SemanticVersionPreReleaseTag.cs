@@ -9,7 +9,7 @@ namespace GitVersion
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    internal class SemanticVersionPreReleaseTag :
+    public class SemanticVersionPreReleaseTag :
         IFormattable, IComparable<SemanticVersionPreReleaseTag>, IEquatable<SemanticVersionPreReleaseTag>
     {
         static LambdaEqualityHelper<SemanticVersionPreReleaseTag> equalityHelper =

@@ -7,7 +7,7 @@ using GitVersion;
 
 namespace ReferenceGenerator
 {
-    class Package : IEquatable<Package>, IComparable<Package>
+    public class Package : IEquatable<Package>, IComparable<Package>
     {
         public Package(string id, string version)
         {

@@ -7,7 +7,7 @@
     using System;
     using System.Text.RegularExpressions;
 
-    internal class SemanticVersion : IFormattable, IComparable<SemanticVersion>
+    public class SemanticVersion : IFormattable, IComparable<SemanticVersion>
     {
         public static SemanticVersion Empty = new SemanticVersion();
 

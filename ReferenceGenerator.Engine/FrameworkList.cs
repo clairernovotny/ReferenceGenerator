@@ -8,7 +8,7 @@ using System.Xml.Linq;
 
 namespace ReferenceGenerator
 {
-    class FrameworkList
+    public class FrameworkList
     {
         readonly HashSet<Reference> references = new HashSet<Reference>(Comparer);
         static readonly ReferenceEqualityComparer Comparer = new ReferenceEqualityComparer();

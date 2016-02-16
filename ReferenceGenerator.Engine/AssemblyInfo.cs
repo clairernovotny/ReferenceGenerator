@@ -5,8 +5,8 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
 namespace ReferenceGenerator
-{ 
-    internal class AssemblyInfo
+{
+    public class AssemblyInfo
     {
         private AssemblyInfo(string path, string name, Version version, Reference[] references)
         {

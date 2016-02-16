@@ -12,7 +12,7 @@ using NuGet.Frameworks;
 
 namespace ReferenceGenerator
 {
-    static class FrameworkListCollection
+    public static class FrameworkListCollection
     {
         const string ResourceRoot = "ReferenceGenerator.Res.";
         static readonly Assembly ThisAssembly = typeof(FrameworkListCollection).Assembly;

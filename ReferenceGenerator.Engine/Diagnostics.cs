@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 namespace ReferenceGenerator
 {
-    class Diagnostic
+    public class Diagnostic
     {
         public string Type { get; private set; }
         public string Code { get; private set; }
@@ -43,12 +43,12 @@ namespace ReferenceGenerator
         }
     }
 
-    class Warning : Diagnostic
+    public class Warning : Diagnostic
     {
         public Warning(string code) : base("warning", code) { }
     }
 
-    class WarningWithMessage : Warning
+    public class WarningWithMessage : Warning
     {
         public WarningWithMessage(string message, string code) : base(code)
         {
@@ -59,7 +59,7 @@ namespace ReferenceGenerator
       
     }
 
-    class Error : Diagnostic
+    public class Error : Diagnostic
     {
         public Error(string code) : base("error", code) { }
     }
@@ -67,7 +67,7 @@ namespace ReferenceGenerator
 
 
 
-    class ErrorWithMessage : Error
+    public class ErrorWithMessage : Error
     {
         public ErrorWithMessage(Exception ex) : base("RG001")
         {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ReferenceGenerator
 {
-    internal class Reference : IEquatable<Reference>
+    public class Reference : IEquatable<Reference>
     {
         public Reference(string name, Version version)
         {
