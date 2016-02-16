@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleProjJsonPcl", "tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleNetStandard11Library", "tests\SampleNetStandard11Library\SampleNetStandard11Library.csproj", "{BE5157E5-169A-4DD9-B514-F114FBCE1612}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Libraries", "Test Libraries", "{9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -142,5 +144,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CC97C224-BAEE-44BB-98E0-77B959D24105} = {9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}
+		{4B64D7B3-A396-45CC-9B8C-DAA868E7BB81} = {9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}
+		{DA03B415-AE61-4218-82B9-F5CFF0B7AF88} = {9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}
+		{A0C3BAA3-ABAF-44B6-B117-2F265A07F7A8} = {9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}
+		{BE5157E5-169A-4DD9-B514-F114FBCE1612} = {9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}
 	EndGlobalSection
 EndGlobal
