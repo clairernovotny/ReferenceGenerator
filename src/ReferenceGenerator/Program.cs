@@ -44,7 +44,7 @@ namespace ReferenceGenerator
             return deps;
         }
 
-        private static int Main(string[] args)
+        static int Main(string[] args)
         {
             // args 0: NuGetTargetMonikers -- .NETStandard,Version=v1.4  
             // args 1: TFM's to generate, semi-colon joined. E.g.: auto;uap10.0 
