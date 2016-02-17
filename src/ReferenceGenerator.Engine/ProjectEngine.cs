@@ -143,7 +143,7 @@ namespace ReferenceGenerator.Engine
 
         public static IEnumerable<PackageWithReference> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, NuGetFramework[] nugetTargetMonikers)
         {
-            // This needs to load the project.lock.json, look for the reference under the 
+            // This needs to load the project.lock.json, look for the reference under the
             // targets -> ".NETPlatform,Version=v5.0", look for each package and the files in it, then pull out based on refs
             if (!File.Exists(lockFile))
                 throw new InvalidOperationException("project.lock.json is missing");
@@ -232,6 +232,22 @@ namespace ReferenceGenerator.Engine
             return results;
         }
 
+        public static IEnumerable<PackageWithReference> GetProjectPackages(Project project, NuGetFramework[] nugetTargetMonikers)
+        {
+            var packages = new List<PackageWithReference>();
+            var assm = project.GetAssemblyInfo();
+            if (project.HasProjectJson)
+            {
+                packages.AddRange(ProjectEngine.GetProjectJsonPackages(project.PackagesFile, assm.References, nugetTargetMonikers));
+            }
+            else
+            {
+                packages.AddRange(ProjectEngine.GetPackagesConfigPackages(project.PackagesFile, project.PackagesFile, assm.References));
+            }
+
+            return packages;
+        }
+
         public static IReadOnlyList<PackageWithReference> GetSortedMostRecentVersions(IEnumerable<PackageWithReference> packages)
         {
             // Now squash all but most recent
@@ -241,6 +257,11 @@ namespace ReferenceGenerator.Engine
                                           .First())
                                  .OrderBy(r => r.Id, StringComparer.OrdinalIgnoreCase)
                                  .ToList();
+
+            if (groups.Any(g => string.Equals(g.Id, "mscorlib", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException("mscorlib-based projects are not supported");
+            }
 
             return groups;
         }

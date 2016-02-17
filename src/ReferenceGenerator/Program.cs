@@ -44,13 +44,31 @@ namespace ReferenceGenerator
             return deps;
         }
 
+        private static IList<Project> GetProjectInfo(string files)
+        {
+            var projects = new List<Project>();
+            var pairs = files.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (pairs.Length > 0)
+            {
+                foreach(var pair in pairs)
+                {
+                    var pieces = pair.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (pieces.Length == 2)
+                    {
+                        projects.Add(new Project(pieces[0], pieces[1]));
+                    }
+                }
+            }
+
+            return projects;
+        }
+
         static int Main(string[] args)
         {
-            // args 0: NuGetTargetMonikers -- .NETStandard,Version=v1.4  
-            // args 1: TFM's to generate, semi-colon joined. E.g.: auto;uap10.0 
+            // args 0: NuGetTargetMonikers -- .NETStandard,Version=v1.4
+            // args 1: TFM's to generate, semi-colon joined. E.g.: auto;uap10.0
             // args 2: nuspec file
-            // args 3: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
-            // args 4: target files, semi-colon joined
+            // args 3: a semi-colon joined list of project/target file pairs.
 
             try
             {
@@ -64,14 +82,6 @@ namespace ReferenceGenerator
                                   .ToArray();
 
                 var nuspecFile = args[2];
-
-                var projectFiles = args[3].Split(';')
-                                          .Where(s => !string.IsNullOrWhiteSpace(s))
-                                          .ToArray();
-                var files = args[4].Split(';')
-                                   .Where(s => !string.IsNullOrWhiteSpace(s))
-                                   .ToArray();
-
 
                 // calc target for PCL profiles
                 var firstTfm = nugetTargetMonikers.FirstOrDefault();
@@ -101,64 +111,22 @@ namespace ReferenceGenerator
                     }
                 }
 
-
                 var packages = new List<PackageWithReference>();
-
-                for (var i = 0; i < projectFiles.Length; i++)
+                foreach(var project in GetProjectInfo(args[3]))
                 {
-                    var assm = AssemblyInfo.GetAssemblyInfo(files[i]);
-                    var projectFileName = Path.GetFileNameWithoutExtension(projectFiles[i]);
-
-                    var projDir = Path.GetDirectoryName(projectFiles[i]);
-                    if (File.Exists(Path.Combine(projDir, $"{projectFileName}.project.json")))
-                    {
-                        // ProjectName.Project.json
-                        var lockFile = Path.Combine(projDir, $"{projectFileName}.project.lock.json");
-
-                        var pkgs = ProjectEngine.GetProjectJsonPackages(lockFile, assm.References, nugetTargetMonikers);
-                        packages.AddRange(pkgs);
-                    }
-                    else if (File.Exists(Path.Combine(projDir, "project.json")))
-                    {
-                        // Project.json
-                        var lockFile = Path.Combine(projDir, "project.lock.json");
-                        var pkgs = ProjectEngine.GetProjectJsonPackages(lockFile, assm.References, nugetTargetMonikers);
-                        packages.AddRange(pkgs);
-                    }
-                    else if (File.Exists(Path.Combine(projDir, $"packages.{projectFileName}.config")))
-                    {
-                        var pkgs = ProjectEngine.GetPackagesConfigPackages(projectFiles[i], $"packages.{projectFileName}.config", assm.References);
-                        packages.AddRange(pkgs);
-                    }
-                    else if (File.Exists(Path.Combine(projDir, "packages.config")))
-                    {
-                        var pkgs = ProjectEngine.GetPackagesConfigPackages(projectFiles[i], "packages.config", assm.References);
-                        packages.AddRange(pkgs);
-                    }
-                    else
-                    {
-                        // Must be an "old" PCL without any refs. Best we can do is read the refs
-                        var pkgs = ProjectEngine.GetPackagesConfigPackages(projectFiles[i], null, assm.References);
-                        packages.AddRange(pkgs);
-                    }
+                    packages.AddRange(ProjectEngine.GetProjectPackages(project, nugetTargetMonikers));
                 }
-
 
                 // Now squash all but most recent
                 var groups = ProjectEngine.GetSortedMostRecentVersions(packages);
-
-                // make sure there is no mscorlib
-                if (groups.Any(g => string.Equals(g.Id, "mscorlib", StringComparison.OrdinalIgnoreCase)))
-                    throw new InvalidOperationException("mscorlib-based projects are not supported");
-
 
                 UpdateNuspecFile(nuspecFile, groups, tfms);
                 return 0;
             }
             catch (UnixNotSupportedException)
             {
-                // If we're in a place where we cannot check reference assemblies on Unix, issue a 
-                // warning and return a non-error code 
+                // If we're in a place where we cannot check reference assemblies on Unix, issue a
+                // warning and return a non-error code
                 Console.Error.WriteLine(WarningWithMessage.ClassicPclUnix);
                 return 0;
             }
@@ -233,7 +201,7 @@ namespace ReferenceGenerator
                     xe.Remove();
                 }
 
-                // Add the new ones back in 
+                // Add the new ones back in
                 grp.Add(ele.Elements());
             }
             else
