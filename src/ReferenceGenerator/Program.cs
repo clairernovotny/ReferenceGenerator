@@ -57,6 +57,10 @@ namespace ReferenceGenerator
                     {
                         projects.Add(new Project(pieces[0], pieces[1]));
                     }
+                    else if (pieces.Length == 1)
+                    {
+                        projects.Add(new Project(pieces[0], String.Empty));
+                    }
                 }
             }
 
@@ -68,7 +72,7 @@ namespace ReferenceGenerator
             // args 0: NuGetTargetMonikers -- .NETStandard,Version=v1.4
             // args 1: TFM's to generate, semi-colon joined. E.g.: auto;uap10.0
             // args 2: nuspec file
-            // args 3: a semi-colon joined list of project/target file pairs.
+            // args 3: a semi-colon joined list of project file/configuration pairs. The configuration is only needed for xproj based projects.
 
             try
             {

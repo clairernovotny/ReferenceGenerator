@@ -235,14 +235,14 @@ namespace ReferenceGenerator.Engine
         public static IEnumerable<PackageWithReference> GetProjectPackages(Project project, NuGetFramework[] nugetTargetMonikers)
         {
             var packages = new List<PackageWithReference>();
-            var assm = project.GetAssemblyInfo();
             if (project.HasProjectJson)
             {
-                packages.AddRange(ProjectEngine.GetProjectJsonPackages(project.PackagesFile, assm.References, nugetTargetMonikers));
+                AssemblyInfo assemblyInfo = project.IsXProject ? project.GetAssemblyInfo(nugetTargetMonikers[0]) : project.GetAssemblyInfo();
+                packages.AddRange(ProjectEngine.GetProjectJsonPackages(project.PackagesFile, assemblyInfo.References, nugetTargetMonikers));
             }
             else
             {
-                packages.AddRange(ProjectEngine.GetPackagesConfigPackages(project.PackagesFile, project.PackagesFile, assm.References));
+                packages.AddRange(ProjectEngine.GetPackagesConfigPackages(project.PackagesFile, project.PackagesFile, project.GetAssemblyInfo().References));
             }
 
             return packages;
