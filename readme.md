@@ -99,13 +99,12 @@ In some cases, you may need to have multiple dependency groups, like having both
 ## Command line
 This tool is a command line that you can call in other ways. The parameters are as follows and they are all required:
 
-```
-// args 0: NuGetTargetMoniker: .NETPlatform,Version=v5.0
-// args 1: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0
-// args 2: nuspec file, full path
-// args 3: project file (csproj/vbproj, etc) full path. Used to look for packages.config/project.json and references. should match order of target files
-// args 4: target files, semi-colon joined, full path
-```
+|Argument Position | Description/Notes|
+|:-------:|-------|
+| 0 |  NuGetTargetMoniker: .NETPlatform,Version=v5.0 |
+| 1 | TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0 |
+| 2 | nuspec file, full path |
+| 3 | A semi-colon joined list of projectPath=[assemblyPath\|configurationName] pairs. The only required part is projectPath, which shoudl be a fully qualified path to the project. In that case, the tool tries to figure out the assembly path based on the information in the project file. If you provide an assemblyPath, the tool just uses that. If the project is an XPROJ based project, then the configurationName is required. |
 
 ## Limitations
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
