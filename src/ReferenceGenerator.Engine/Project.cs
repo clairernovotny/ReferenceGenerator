@@ -1,26 +1,79 @@
-﻿using NuGet.Frameworks;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using NuGet.Frameworks;
 
 namespace ReferenceGenerator.Engine
 {
     public class Project : IEquatable<Project>, IComparable<Project>
     {
-        private string assemblyName;
-        private string assemblyPath;
-        private string configuration;
-        private string platform;
-        private string projectDirectory;
-        private string originalPath;
+        string assemblyName;
+        string assemblyPath;
+        string configuration;
+        readonly string originalPath;
+        string platform;
+        readonly string projectDirectory;
+
+        Project(string path)
+        {
+            originalPath = path;
+            projectDirectory = Path.GetDirectoryName(path);
+            ProjectFileName = Path.GetFileNameWithoutExtension(path);
+            IsXProject = Path.GetExtension(path)
+                             .Equals(".xproj", StringComparison.OrdinalIgnoreCase);
+            ConfigurePackageProperties();
+        }
+
+        public bool HasProjectJson { get; private set; }
+
+        public bool IsXProject { get; }
+
+        public string PackagesFile { get; private set; }
+
+        public string ProjectFileName { get; }
+
+        public int CompareTo(Project other)
+        {
+            // sort on name for now
+            return StringComparer.OrdinalIgnoreCase.Compare(originalPath, other?.originalPath);
+        }
+
+        public bool Equals(Project other)
+        {
+            if (ReferenceEquals(other, null))
+                return false;
+
+            return string.Equals(originalPath, other.originalPath, StringComparison.OrdinalIgnoreCase) &&
+                   Equals(assemblyPath, other.assemblyPath);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Project);
+        }
+
+        public AssemblyInfo GetAssemblyInfo()
+        {
+            return AssemblyInfo.GetAssemblyInfo(Path.Combine(assemblyPath, assemblyName));
+        }
+
+        public AssemblyInfo GetAssemblyInfo(NuGetFramework tfm)
+        {
+            return AssemblyInfo.GetAssemblyInfo(Path.Combine(assemblyPath, tfm.GetShortFolderName(), assemblyName));
+        }
+
+        public override int GetHashCode()
+        {
+            return unchecked(originalPath?.GetHashCode() ?? 1 ^ assemblyPath?.GetHashCode() ?? 1);
+        }
 
         public static Project Parse(string pair)
         {
-            var items = pair.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
+            var items = pair.Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
             // We have to have at least 1 element, which will be the fully qualified
             // path to the project.
 
@@ -46,28 +99,7 @@ namespace ReferenceGenerator.Engine
             return project;
         }
 
-        private Project(string path)
-        {
-            originalPath = path;
-            projectDirectory = Path.GetDirectoryName(path);
-            ProjectFileName = Path.GetFileNameWithoutExtension(path);
-            IsXProject = Path.GetExtension(path).Equals(".xproj", StringComparison.OrdinalIgnoreCase);
-            ConfigurePackageProperties();
-        }
-
-        #region properties
-        public bool HasProjectJson { get; private set; }
-
-        public bool IsXProject { get; private set; }
-
-        public string PackagesFile { get; private set; }
-
-        public string ProjectFileName { get; private set; }
-        #endregion
-
-        #region methods
-
-        private void ConfigureAssemblyProperties(string assemblyPathOrConfiguration)
+        void ConfigureAssemblyProperties(string assemblyPathOrConfiguration)
         {
             if (File.Exists(assemblyPathOrConfiguration))
             {
@@ -87,7 +119,7 @@ namespace ReferenceGenerator.Engine
             }
         }
 
-        private void ConfigurePackageProperties()
+        void ConfigurePackageProperties()
         {
             if (File.Exists(Path.Combine(projectDirectory, $"{ProjectFileName}.project.json")))
             {
@@ -117,31 +149,35 @@ namespace ReferenceGenerator.Engine
             }
         }
 
-        private string GetAssemblyName(XElement document, XNamespace ns)
+        string GetAssemblyName(XElement document, XNamespace ns)
         {
-            return $"{document.Descendants(ns + "AssemblyName").FirstOrDefault()?.Value ?? ProjectFileName}.dll";
+            return $"{document.Descendants(ns + "AssemblyName") .FirstOrDefault() ?.Value ?? ProjectFileName}.dll";
         }
 
-        private static Tuple<string, string> GetCurrentProjectConfiguration(XElement document, XNamespace ns, string configuration)
+        static Tuple<string, string> GetCurrentProjectConfiguration(XElement document, XNamespace ns, string configuration)
         {
-            var computedConfiguration = document.Descendants(ns + "Configuration").SingleOrDefault()?.Value ?? configuration;
-            var platformNode = document.Descendants(ns + "Platform").SingleOrDefault();
-            return Tuple.Create(computedConfiguration, platformNode?.Value ?? String.Empty);
+            var computedConfiguration = document.Descendants(ns + "Configuration")
+                                                .SingleOrDefault()
+                                            ?.Value ?? configuration;
+            var platformNode = document.Descendants(ns + "Platform")
+                                       .SingleOrDefault();
+            return Tuple.Create(computedConfiguration, platformNode?.Value ?? string.Empty);
         }
 
-        private string GetOutputPathFromProject(XElement document, XNamespace ns)
+        string GetOutputPathFromProject(XElement document, XNamespace ns)
         {
-            var binaryPath = String.Empty;
+            var binaryPath = string.Empty;
             var propertyGroup = GetPropertyGroup(document, ns, "Label", "Globals");
             if (propertyGroup == null)
             {
-                var configurationAndPlatform = $"{configuration}{(String.IsNullOrWhiteSpace(platform) ? String.Empty : $"|{platform}")}";
+                var configurationAndPlatform = $"{configuration}{(string.IsNullOrWhiteSpace(platform) ? string.Empty : $"|{platform}")}";
                 propertyGroup = GetPropertyGroup(document, ns, "Condition", configurationAndPlatform);
             }
 
             if (propertyGroup != null)
             {
-                var outputPath = propertyGroup.Element(ns + "OutputPath").Value;
+                var outputPath = propertyGroup.Element(ns + "OutputPath")
+                                              .Value;
                 if (outputPath.Contains("$(MSBuildProjectName)"))
                 {
                     outputPath = outputPath.Replace("$(MSBuildProjectName)", ProjectFileName);
@@ -153,45 +189,11 @@ namespace ReferenceGenerator.Engine
             return binaryPath;
         }
 
-        private static XElement GetPropertyGroup(XElement document, XNamespace ns, string attributeName, string attributeValuePattern)
+        static XElement GetPropertyGroup(XElement document, XNamespace ns, string attributeName, string attributeValuePattern)
         {
-            return document.Descendants(ns + "PropertyGroup").FirstOrDefault(p => p.Attribute(attributeName)?.Value.Contains(attributeValuePattern) ?? false);
+            return document.Descendants(ns + "PropertyGroup")
+                           .FirstOrDefault(p => p.Attribute(attributeName)
+                                                    ?.Value.Contains(attributeValuePattern) ?? false);
         }
-
-        public int CompareTo(Project other)
-        {
-            // sort on name for now
-            return StringComparer.OrdinalIgnoreCase.Compare(originalPath, other?.originalPath);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as Package);
-        }
-
-        public bool Equals(Project other)
-        {
-            if (ReferenceEquals(other, null))
-                return false;
-
-            return string.Equals(originalPath, other.originalPath, StringComparison.OrdinalIgnoreCase) &&
-                   Equals(assemblyPath, other.assemblyPath);
-        }
-
-        public AssemblyInfo GetAssemblyInfo()
-        {
-            return AssemblyInfo.GetAssemblyInfo(Path.Combine(assemblyPath, assemblyName));
-        }
-
-        public AssemblyInfo GetAssemblyInfo(NuGetFramework tfm)
-        {
-            return AssemblyInfo.GetAssemblyInfo(Path.Combine(assemblyPath, tfm.GetShortFolderName(), assemblyName));
-        }
-
-        public override int GetHashCode()
-        {
-            return unchecked(originalPath?.GetHashCode() ?? 1 ^ assemblyPath?.GetHashCode() ?? 1);
-        }
-        #endregion
     }
 }

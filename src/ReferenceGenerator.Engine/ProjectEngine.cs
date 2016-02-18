@@ -53,15 +53,15 @@ namespace ReferenceGenerator.Engine
 
             var projDoc = XDocument.Load(projectFile);
             XNamespace projNs = projDoc.Root.Attribute("xmlns")
-                                      ?.Value ?? string.Empty;
+                                    ?.Value ?? string.Empty;
 
             // get version and profile
             var profile = projDoc.Descendants(projNs + "TargetFrameworkProfile")
                                  .FirstOrDefault()
-                                ?.Value;
+                ?.Value;
             var version = projDoc.Descendants(projNs + "TargetFrameworkVersion")
                                  .FirstOrDefault()
-                                ?.Value;
+                ?.Value;
             if (string.IsNullOrWhiteSpace(profile) || string.IsNullOrWhiteSpace(version))
                 throw new InvalidOperationException("Only PCLs are supported by this tool. TargetFrameworkProfile or TargetFrameworkVersion is missing");
 
@@ -94,7 +94,7 @@ namespace ReferenceGenerator.Engine
                 {
                     var packagesDoc = XDocument.Load(Path.Combine(Path.GetDirectoryName(projectFile), packagesConfig));
                     var packagesNs = packagesDoc.Root.Attribute("xmlns")
-                                               ?.Value ?? string.Empty;
+                                         ?.Value ?? string.Empty;
 
                     packageMap = packagesDoc.Descendants(packagesNs + "package")
                                             .Select(e => new Package(e.Attribute("id")
@@ -114,7 +114,7 @@ namespace ReferenceGenerator.Engine
                                 let assm = e.Attribute("Include")
                                             .Value.Split(',')[0]
                                 let hintPath = e.Element(projNs + "HintPath")
-                                               ?.Value
+                                    ?.Value
                                 let startIndex = hintPath?.IndexOf("packages\\", StringComparison.OrdinalIgnoreCase) + 9 ?? -1
                                 let endIndex = hintPath?.IndexOf('\\', startIndex) ?? -1
                                 let packageDir = hintPath?.Substring(startIndex, endIndex - startIndex) ?? null
@@ -163,7 +163,7 @@ namespace ReferenceGenerator.Engine
                 netPlatform = (JObject)((JObject)projectJson["targets"])
                                            .Properties()
                                            .FirstOrDefault(p => p.Name.StartsWith(tfm.DotNetFrameworkName, StringComparison.OrdinalIgnoreCase))
-                                          ?
+                                           ?
                                            .Value;
 
                 // found one
@@ -237,12 +237,13 @@ namespace ReferenceGenerator.Engine
             var packages = new List<PackageWithReference>();
             if (project.HasProjectJson)
             {
-                AssemblyInfo assemblyInfo = project.IsXProject ? project.GetAssemblyInfo(nugetTargetMonikers[0]) : project.GetAssemblyInfo();
-                packages.AddRange(ProjectEngine.GetProjectJsonPackages(project.PackagesFile, assemblyInfo.References, nugetTargetMonikers));
+                var assemblyInfo = project.IsXProject ? project.GetAssemblyInfo(nugetTargetMonikers[0]) : project.GetAssemblyInfo();
+                packages.AddRange(GetProjectJsonPackages(project.PackagesFile, assemblyInfo.References, nugetTargetMonikers));
             }
             else
             {
-                packages.AddRange(ProjectEngine.GetPackagesConfigPackages(project.PackagesFile, project.PackagesFile, project.GetAssemblyInfo().References));
+                packages.AddRange(GetPackagesConfigPackages(project.PackagesFile, project.PackagesFile, project.GetAssemblyInfo()
+                                                                                                               .References));
             }
 
             return packages;

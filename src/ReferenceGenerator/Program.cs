@@ -44,16 +44,13 @@ namespace ReferenceGenerator
             return deps;
         }
 
-        private static IList<Project> GetProjectInfo(string files)
+        static IEnumerable<Project> GetProjectInfo(string files)
         {
             var projects = new List<Project>();
             var pairs = files.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             if (pairs.Length > 0)
             {
-                foreach(var pair in pairs)
-                {
-                    projects.Add(Project.Parse(pair));
-                }
+                projects.AddRange(pairs.Select(Project.Parse));
             }
 
             return projects;
