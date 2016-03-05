@@ -256,21 +256,21 @@ namespace ReferenceGenerator.Engine
                 yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(framework, packages);
                 foreach (var fx in CompatibilityListProvider.Default.GetFrameworksSupporting(framework))
                 {
-                    if (!FrameworkListCollection.Contains(fx))
-                        continue;
-
-                    var frameworkList = FrameworkListCollection.GetFrameworkList(fx);
-
-
-                    // Filter down the packages if based on the frameworklist
-                    var toDrop = packages.Where(p => frameworkList.ContainsReference(p.Reference))
-                                         .ToList();
-
-                    var filtered = packages.Except(toDrop)
-                                           .OrderBy(p => p.Id)
-                                           .ToList();
-
-                    yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(fx, filtered);
+                    if (FrameworkListCollection.Contains(fx))
+                    {
+                        var frameworkList = FrameworkListCollection.GetFrameworkList(fx);
+                        // Filter down the packages if based on the frameworklist
+                        var toDrop = packages.Where(p => frameworkList.ContainsReference(p.Reference))
+                                             .ToList();
+                        var filtered = packages.Except(toDrop)
+                                               .OrderBy(p => p.Id)
+                                               .ToList();
+                        yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(fx, filtered);
+                    }
+                    else if(fx.Framework == ".NETCore") // make sure to output .NET Core 5 since it superceeds win8/wpa81 refs 
+                    {
+                        yield return new Tuple<NuGetFramework, IEnumerable<PackageWithReference>>(fx, packages);
+                    }
                 }
             }
             else

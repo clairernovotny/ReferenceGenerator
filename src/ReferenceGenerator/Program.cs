@@ -175,7 +175,7 @@ namespace ReferenceGenerator
             // Takes the input TFMs that the user specified and writes. For portable, we squash "inbox" references and then apply baseline updates
             foreach (var tfm in tfms)
             {
-                foreach (var tuple in ProjectEngine.SquashBuiltInPackages(packages, tfm))
+                foreach (var tuple in ProjectEngine.SquashBuiltInPackages(packages, tfm).OrderBy(t => t.Item1.GetShortFolderName()))
                 {
                     var baselined = ProjectEngine.ApplyBaselinePackageVersions(tuple.Item2)
                                                  .ToList();
