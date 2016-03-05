@@ -21,6 +21,8 @@
       <group targetFramework="monotouch" />
       <group targetFramework="xamarinios" />
       <group targetFramework="xamarinmac" />
+      <group targetFramework="xamarintvos" />
+      <group targetFramework="xamarinwatchos" />
     </dependencies>
   </metadata>
 </package>

@@ -119,6 +119,11 @@
   <ItemGroup>
     <EmbeddedResource Include="Res\Xamarin.Mac,Version=v2.0\FrameworkList.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Res\.NETFramework,Version=v4.6.2\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\Xamarin.TVOS,Version=v1.0\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\Xamarin.WatchOS,Version=v1.0\FrameworkList.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
