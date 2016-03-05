@@ -8,9 +8,19 @@
     <description>My package description.</description>
     <dependencies>
       <group targetFramework="netstandard1.3">
-        <dependency id="System.Resources.ResourceManager" version="4.0.1-rc2-23623" />
-        <dependency id="System.Runtime" version="4.0.21-rc2-23623" />
+        <dependency id="System.Resources.ResourceManager" version="4.0.1" />
+        <dependency id="System.Runtime" version="4.1.0-rc2-23904" />
+        <dependency id="System.Text.RegularExpressions" version="4.0.12-rc2-23904" />
       </group>
+      <group targetFramework="net46">
+        <dependency id="System.Resources.ResourceManager" version="4.0.1" />
+        <dependency id="System.Runtime" version="4.1.0-rc2-23904" />
+        <dependency id="System.Text.RegularExpressions" version="4.0.12-rc2-23904" />
+      </group>
+      <group targetFramework="monoandroid" />
+      <group targetFramework="monotouch" />
+      <group targetFramework="xamarinios" />
+      <group targetFramework="xamarinmac" />
     </dependencies>
   </metadata>
 </package>
