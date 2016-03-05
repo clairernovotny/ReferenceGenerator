@@ -37,8 +37,13 @@ namespace ReferenceGenerator.Engine
                 // see if the framework equal to or higher in version
                 var fxRef = references.First(r => Comparer.Equals(r, reference));
 
-                // If rx ref is zero, match all, otherwise check ver
-                if (fxRef.Version.Equals(Zero) || fxRef.Version >= reference.Version)
+                // If rx ref is zero, match all, otherwise check major.minor ver
+                // See https://github.com/dotnet/buildtools/blob/master/src/Microsoft.DotNet.Build.Tasks.Packaging/src/Framework.cs#L193
+                
+                var fxVer = new Version(fxRef.Version.Major, fxRef.Version.Minor);
+                var refVer = new Version(reference.Version.Major, reference.Version.Minor);
+
+                if (fxRef.Version.Equals(Zero) || fxVer >= refVer)
                     return true;
             }
 
