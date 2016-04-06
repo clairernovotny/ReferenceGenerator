@@ -23,8 +23,7 @@
       <Version>4.0.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Collections.Concurrent">
-      <!-- intentionally lower than live to support UWP shared library -->
-      <Version>4.0.11</Version>
+      <Version>4.0.12</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Collections.Immutable">
       <Version>1.2.0</Version>
@@ -60,7 +59,7 @@
       <Version>4.0.1</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Data.SqlClient">
-      <Version>4.0.0</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Diagnostics.Contracts">
       <Version>4.0.1</Version>
@@ -90,8 +89,10 @@
       <Version>4.0.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Diagnostics.Tracing">
-      <!-- intentionally lower than live to support UWP shared library -->
-      <Version>4.0.21</Version>
+      <Version>4.1.0</Version>
+    </BaseLinePackage>
+    <BaseLinePackage Include="System.Drawing.Primitives">
+      <Version>4.0.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Dynamic.Runtime">
       <Version>4.0.11</Version>
@@ -133,8 +134,7 @@
       <Version>4.0.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.IO">
-      <!-- intentionally lower than live to support UWP shared library -->
-      <Version>4.0.11</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.IO.Packaging">
       <Version>4.0.0</Version>
@@ -149,8 +149,7 @@
       <Version>4.0.11</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Linq">
-      <!-- intentionally lower than live to support UWP shared library -->
-      <Version>4.0.1</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Linq.Parallel">
       <Version>4.0.1</Version>
@@ -204,8 +203,7 @@
       <Version>4.0.1</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.ObjectModel">
-      <!-- intentionally lower than live to support UWP shared library -->
-      <Version>4.0.11</Version>
+      <Version>4.0.12</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Reflection.Context">
       <Version>4.0.1</Version>
@@ -235,8 +233,7 @@
       <Version>4.0.1</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Reflection.TypeExtensions">
-      <!-- intentionally lower than live to support UWP shared library -->
-      <Version>4.0.1</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Resources.Reader">
       <Version>4.0.0</Version>
@@ -254,15 +251,13 @@
       <Version>4.0.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Runtime.Extensions">
-      <!-- intentionally lower than live to support UWP shared library -->
-      <Version>4.0.11</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Runtime.Handles">
       <Version>4.0.1</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Runtime.InteropServices">
-      <!-- intentionally lower than live to not lift up System.Runtime above baseline -->
-      <Version>4.0.21</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Runtime.InteropServices.PInvoke">
       <Version>4.0.0</Version>
@@ -280,8 +275,7 @@
       <Version>4.0.1</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Runtime">
-      <!-- intentionally lower than live to support UWP shared library -->
-      <Version>4.0.21</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Runtime.Serialization.Json">
       <Version>4.0.2</Version>
@@ -305,10 +299,10 @@
       <Version>4.0.1</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Security.Cryptography.Algorithms">
-      <Version>4.0.0</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Security.Cryptography.Cng">
-      <Version>4.0.0</Version>
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Security.Cryptography.Csp">
       <Version>4.0.0</Version>
@@ -322,8 +316,11 @@
     <BaseLinePackage Include="System.Security.Cryptography.Primitives">
       <Version>4.0.0</Version>
     </BaseLinePackage>
-    <BaseLinePackage Include="System.Security.Cryptography.X509Certificates">
+    <BaseLinePackage Include="System.Security.Cryptography.ProtectedData">
       <Version>4.0.0</Version>
+    </BaseLinePackage>
+    <BaseLinePackage Include="System.Security.Cryptography.X509Certificates">
+      <Version>4.1.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Security.Principal">
       <Version>4.0.1</Version>
@@ -362,8 +359,7 @@
       <Version>4.0.0</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Text.RegularExpressions">
-      <!-- intentionally lower than live to support UWP shared library -->
-      <Version>4.0.11</Version>
+      <Version>4.0.12</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Threading.AccessControl">
       <Version>4.0.0</Version>
