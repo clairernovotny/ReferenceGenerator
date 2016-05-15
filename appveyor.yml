@@ -15,5 +15,5 @@ build:
   project: ReferenceGenerator.sln
     
 after_build:    
-  - cmd: nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%" -basepath "artifacts"
+  - cmd: nuget pack NuSpec.ReferenceGenerator.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%"
   - cmd: appveyor PushArtifact "NuSpec.ReferenceGenerator.%GitVersion_NuGetVersion%.nupkg"

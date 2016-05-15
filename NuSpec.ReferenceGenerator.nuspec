@@ -14,4 +14,8 @@
     <releaseNotes>Release notes here: https://github.com/onovotny/ReferenceGenerator#changelog</releaseNotes>
     <tags>nuspec coreclr dnx nuget dependency dotnet uap netstandard refgen</tags>
   </metadata>  
+  <files>
+    <file src="artifacts\tools\*.*" target="tools" />
+    <file src="artifacts\build\**\*.*" target="build" />    
+  </files>
 </package>
