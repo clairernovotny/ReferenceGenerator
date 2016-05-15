@@ -1,6 +1,6 @@
 # NuSpec Reference Generator
 ## Overview
-Package authoring for .NET Core based libraries (ASPNet 5, DNX, UWP) has an extra burden on the author as .NET dependencies must be listed in addition to any regular packages you depend on. This could be a long list and it's a challenge to get it right. If you use any of the meta-packages that brings "all" of .NET Core into your project as possible references, how do you know which you actually need?
+Package authoring for .NET Core based libraries (ASPNET Core 1.0, CoreCLR, UWP) has an extra burden on the author as .NET dependencies must be listed in addition to any regular packages you depend on. This could be a long list and it's a challenge to get it right. If you use any of the meta-packages that brings "all" of .NET Core into your project as possible references, how do you know which you actually need?
 
 This tool aims to help by reading your compiled libraries assembly metadata and determine what that list should be. It currently supports any `System.Runtime` based project, including "Profile 259"+ PCL's -- that is, a PCL that targets at least .NET 4.5, Windows 8 and Windows Phone 8.
 
@@ -17,10 +17,10 @@ Using NuGet, add `NuSpec.ReferenceGenerator` to your library project. On build, 
 
 If you have existing package dependencies in your nuspec in the group that aren't picked up by this tool, they'll be silently ignored. This could happen in the case where a HintPath to a Package is missing and the package could not be detected.
 
-When you author your nuspec package, make sure that your library goes into the `\lib\dotnet` directory.
+When you author your nuspec package, make sure that your library goes into the `\lib\netstandard1.x` directory, where x depends on your library. PCL 259's are all `netstandard1.0`.
 
-## Packages containing `dotnet` and existing libraries
-If you have a package that contains a `dotnet` group and targets both new and old platforms, you might need an extra step in your nuspec. This depends on what packages you actually reference in your dotnet section. You might need to add some or all of the following:
+## Packages containing `netstandard` and existing libraries
+If you have a package that contains a `netstandard` group and targets both new and old platforms, you might need an extra step in your nuspec. This depends on what packages you actually reference in your `netstandard` section. You might need to add some or all of the following. The 2.0 version will add these (and more) to minimize the impact on users with `packages.config`:
 ```xml
 <group targetFramework="net45" />
 <group targetFramework="wp8" />
@@ -30,9 +30,9 @@ If you have a package that contains a `dotnet` group and targets both new and ol
 <group targetFramework="monotouch" />
 <group targetFramework="monoandroid" />
 ```
-Depending on the minimum platform versions you target and the minimum platforms supported by your `dotnet` dependencies. NuGet will evaluate `dotnet` for any "System.Runtime" based platform, so that effectively means, `net45`, `wp8`, `win8`, `wpa81`, `xamarin.ios`, `monotouch`, and `monoandroid`. Those platforms support System.Runtime 4.0.0. If you target a newer set of platforms, like `net451`, `Win81` and `wpa81` (Profile 151), then it's System.Runtime is 4.0.10.
+Depending on the minimum platform versions you target and the minimum platforms supported by your `netstandard1.x` dependencies. NuGet will evaluate `netstandard1.x` for any "System.Runtime" based platform, so that effectively means, `net45`, `wp8`, `win8`, `wpa81`, `xamarin.ios`, `monotouch`, and `monoandroid`. Those platforms support System.Runtime 4.0.0. If you target a newer set of platforms, like `net451`, `Win81` and `wpa81` (Profile 151), then it's System.Runtime is 4.0.10.
 
-For example, if you're putting a Profile 151 library in `dotnet`, then your System.Runtime is 4.0.10 and will run on .NET 4.5.1 and higher. For older platforms like .NET 4.5, you'll need to add a blank group
+For example, if you're putting a Profile 151 library in `netstandard1.1`, then your System.Runtime is 4.0.10 and will run on .NET 4.5.1 and higher. For older platforms like .NET 4.5, you'll need to add a blank group
 ```xml
 <group targetFramework="net45" />
 ```
@@ -87,12 +87,12 @@ By default, the tool will look for a .nuspec file with the same name as your lib
 ```
 
 **Target Frameworks**
-By default, the tool will add/update a dependency group for the `dotnet` TFM for a PCL or `uap10.0` for a UWP Class Library.
-In some cases, you may need to have multiple dependency groups, like having both `dotnet` and `uap10.0`. An example of this is if your package includes a `win8` or `win81` library but you'd like the .NET Core-based one to be used there. `dotnet` isn't enough as `win81` is more specific and would "win." Instead, just copy your `dotnet` library to also be under `\lib\uap10.0` and specify an additional TFM for the tool to add/update. This should be a semi-colon joined list.
+By default, the tool will add/update a dependency group for the `netstandard1.x` TFM for a PCL or `uap10.0` for a UWP Class Library.
+In some cases, you may need to have multiple dependency groups, like having both `netstandard1.x` and `uap10.0`. An example of this is if your package includes a `win8` or `win81` library but you'd like the .NET Core-based one to be used there. `netstandard1.x` isn't enough as `win81` is more specific and would "win." Instead, just copy your `netstandard1.x` library to also be under `\lib\uap10.0` and specify an additional TFM for the tool to add/update. This should be a semi-colon joined list.
 ```xml
 <PropertyGroup>
-<!-- dotnet and uap10.0 tfms -->
-  <NuSpecTfm>dotnet;uap10.0</NuSpecTfm>
+<!-- netstandard1.x and uap10.0 tfms -->
+  <NuSpecTfm>auto;uap10.0</NuSpecTfm>
 </PropertyGroup>
 ```
 
@@ -101,7 +101,7 @@ This tool is a command line that you can call in other ways. The parameters are 
 
 ```
 // args 0: NuGetTargetMoniker: .NETPlatform,Version=v5.0
-// args 1: TFM's to generate, semi-colon joined. E.g.: dotnet;uap10.0
+// args 1: TFM's to generate, semi-colon joined. E.g.: auto;uap10.0
 // args 2: nuspec file, full path
 // args 3: project file (csproj/vbproj, etc) full path. Used to look for packages.config/project.json and references. should match order of target files
 // args 4: target files, semi-colon joined, full path
@@ -111,6 +111,7 @@ This tool is a command line that you can call in other ways. The parameters are 
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
 
 ## Changelog
+- 2.0.0-beta1: Initial support for `netstandard` and .NET Core RC2
 - 1.4.2: Add a more descriptive error message for NuSpec files that have incorrect XML namespace declarations
 - 1.4.1: Issue warning and do not run RefGen on non-Windows systems until full mono compatibility is tested and verified. Prevents breaking builds.
 - 1.4: Fix issue where BCL libs weren't detected correctly for PCL projects using project.json instead of packages.config
