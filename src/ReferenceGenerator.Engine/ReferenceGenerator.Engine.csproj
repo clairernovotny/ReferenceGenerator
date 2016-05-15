@@ -124,6 +124,20 @@
     <EmbeddedResource Include="Res\Xamarin.TVOS,Version=v1.0\FrameworkList.xml" />
     <EmbeddedResource Include="Res\Xamarin.WatchOS,Version=v1.0\FrameworkList.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Res\.NETFramework,Version=v4.6.3\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.5,Profile=Profile111\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.5,Profile=Profile259\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.5,Profile=Profile49\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.5,Profile=Profile78\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.5,Profile=Profile7\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.6,Profile=Profile151\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.6,Profile=Profile157\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.6,Profile=Profile31\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.6,Profile=Profile32\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.6,Profile=Profile44\FrameworkList.xml" />
+    <EmbeddedResource Include="Res\.NETPortable,Version=v4.6,Profile=Profile84\FrameworkList.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

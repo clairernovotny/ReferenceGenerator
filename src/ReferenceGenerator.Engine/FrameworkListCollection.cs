@@ -74,7 +74,8 @@ namespace ReferenceGenerator.Engine
             var fxStr = resource.Substring(ResourceRoot.Length);
             fxStr = fxStr.Substring(0, fxStr.LastIndexOf('.', fxStr.Length - 5));
 
-            fxStr = fxStr.Replace("_Version_", ",Version=")
+            fxStr = fxStr.Replace("_Version_", ",Version=");
+            fxStr = fxStr.Replace("_Profile_", ",Profile=")
                          .Replace("._", ".");
 
             return NuGetFramework.Parse(fxStr);
@@ -82,9 +83,12 @@ namespace ReferenceGenerator.Engine
 
         static string ResourceNameFromNuGetFramework(NuGetFramework framework)
         {
-            var resourceSafeString = $"{framework.Framework}_Version_v{framework.Version.GetDisplayVersion() .Replace(".", "._")}";
+            var resourceSafeString = $"{framework.Framework}_Version_v{framework.Version.GetDisplayVersion() .Replace(".", "._")}{GetProfileString(framework)}";
 
             return resourceSafeString;
         }
+
+        static string GetProfileString(NuGetFramework framework) => framework.HasProfile ? "_Profile_" + framework.Profile : string.Empty;
+        
     }
 }

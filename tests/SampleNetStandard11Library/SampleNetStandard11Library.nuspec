@@ -11,13 +11,18 @@
       <group targetFramework="monotouch" />
       <group targetFramework="net45" />
       <group targetFramework="netcore50">
-        <dependency id="System.Runtime" version="4.1.0-rc2-23904" />
-        <dependency id="System.Text.RegularExpressions" version="4.0.12-rc2-23904" />
+        <dependency id="System.Runtime" version="4.1.0" />
+        <dependency id="System.Text.RegularExpressions" version="4.0.12" />
       </group>
       <group targetFramework="netstandard1.1">
-        <dependency id="System.Runtime" version="4.1.0-rc2-23904" />
-        <dependency id="System.Text.RegularExpressions" version="4.0.12-rc2-23904" />
+        <dependency id="System.Runtime" version="4.1.0" />
+        <dependency id="System.Text.RegularExpressions" version="4.0.12" />
       </group>
+      <group targetFramework="portable-net45+win8" />
+      <group targetFramework="portable-net45+win8+wpa81" />
+      <group targetFramework="portable-net451+win81" />
+      <group targetFramework="portable-net451+win81+wpa81" />
+      <group targetFramework="portable-win81+wpa81" />
       <group targetFramework="win8" />
       <group targetFramework="wpa81" />
       <group targetFramework="xamarinios" />
