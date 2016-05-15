@@ -28,8 +28,25 @@ namespace ReferenceGenerator.Engine
                 Package baseline;
                 if (blp.TryGetValue(package.Id, out baseline))
                 {
-                    // baseline knows about the package, make sure we use the higher ver
-                    yield return (baseline.Version > package.Version ? baseline : package);
+                    var returned = false;
+                    // see if the package has a prerelease
+                    if (package.Version.PreReleaseTag.Name != null)
+                    {
+                        if (package.Version.Major == baseline.Version.Major &&
+                            package.Version.Minor == baseline.Version.Minor &&
+                            package.Version.Patch == baseline.Version.Patch)
+                        {
+                            returned = true;
+                            // special case where the version in the ref is the pre-release, just use that
+                            yield return package;
+                        }
+                    }
+
+                    if (!returned)
+                    {
+                        // baseline knows about the package, make sure we use the higher ver
+                        yield return (baseline.Version > package.Version ? baseline : package);
+                    }
                 }
                 else
                 {

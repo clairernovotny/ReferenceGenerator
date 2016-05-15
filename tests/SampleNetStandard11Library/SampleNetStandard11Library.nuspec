@@ -11,12 +11,12 @@
       <group targetFramework="monotouch" />
       <group targetFramework="net45" />
       <group targetFramework="netcore50">
-        <dependency id="System.Runtime" version="4.1.0" />
-        <dependency id="System.Text.RegularExpressions" version="4.0.12" />
+        <dependency id="System.Runtime" version="4.1.0-rc2-24027" />
+        <dependency id="System.Text.RegularExpressions" version="4.0.12-rc2-24027" />
       </group>
       <group targetFramework="netstandard1.1">
-        <dependency id="System.Runtime" version="4.1.0" />
-        <dependency id="System.Text.RegularExpressions" version="4.0.12" />
+        <dependency id="System.Runtime" version="4.1.0-rc2-24027" />
+        <dependency id="System.Text.RegularExpressions" version="4.0.12-rc2-24027" />
       </group>
       <group targetFramework="portable-net45+win8" />
       <group targetFramework="portable-net45+win8+wpa81" />
