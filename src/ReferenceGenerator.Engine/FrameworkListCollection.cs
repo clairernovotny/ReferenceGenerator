@@ -16,7 +16,7 @@ namespace ReferenceGenerator.Engine
         const string ResourceRoot = "ReferenceGenerator.Engine.Res.";
         static readonly Assembly ThisAssembly = typeof(FrameworkListCollection).Assembly;
         static readonly string[] ThisAssemblyResources = ThisAssembly.GetManifestResourceNames();
-        static readonly HashSet<NuGetFramework> ThisAssemblyFrameworks = new HashSet<NuGetFramework>(ThisAssemblyResources.Select(FromResourceString));
+        static readonly HashSet<NuGetFramework> ThisAssemblyFrameworks = new HashSet<NuGetFramework>(ThisAssemblyResources.Where(res => res.StartsWith(ResourceRoot)).Select(FromResourceString));
         static readonly ConcurrentDictionary<NuGetFramework, FrameworkList> FrameworkLists = new ConcurrentDictionary<NuGetFramework, FrameworkList>();
 
         public static bool Contains(NuGetFramework framework)

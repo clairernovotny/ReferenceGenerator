@@ -57,6 +57,7 @@ namespace ReferenceGenerator
                 var nugetTargetMonikers = args[0].Split(';')
                                                  .Where(s => !string.IsNullOrWhiteSpace(s))
                                                  .Select(NuGetFramework.Parse)
+                                                 .Where(tfm => tfm.Framework != ".NETPlatform")
                                                  .ToArray();
                 var tfms = args[1].Split(';')
                                   .Where(s => !string.IsNullOrWhiteSpace(s))
@@ -175,12 +176,19 @@ namespace ReferenceGenerator
             // Takes the input TFMs that the user specified and writes. For portable, we squash "inbox" references and then apply baseline updates
             foreach (var tfm in tfms)
             {
+#if false
                 foreach (var tuple in ProjectEngine.SquashBuiltInPackages(packages, tfm).OrderBy(t => t.Item1.GetShortFolderName()))
                 {
                     var baselined = ProjectEngine.ApplyBaselinePackageVersions(tuple.Item2)
                                                  .ToList();
                     UpdateNuSpecFileForTfm(nuspecFile, baselined, tuple.Item1);
                 }
+#endif
+
+                var baselined = ProjectEngine.ApplyBaselinePackageVersions(packages)
+                                                 .ToList();
+
+                UpdateNuSpecFileForTfm(nuspecFile, baselined, tfm);
             }
         }
 
