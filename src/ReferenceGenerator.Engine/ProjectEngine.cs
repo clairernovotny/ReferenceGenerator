@@ -275,6 +275,7 @@ namespace ReferenceGenerator.Engine
             var query = (from package in netPlatform.Properties()
                          let packageNameAndVer = package.Name.Split('/')
                          let packageObj = (JObject)package.Value
+                         where string.Equals(packageObj.Property("type").Value.Value<string>(), "package", StringComparison.OrdinalIgnoreCase)
                          let compileProp = packageObj.Properties()
                                                      .FirstOrDefault(p => p.Name == "compile")
                          where compileProp != null
