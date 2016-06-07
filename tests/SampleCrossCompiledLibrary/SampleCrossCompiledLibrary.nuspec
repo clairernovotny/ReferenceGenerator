@@ -7,7 +7,13 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>My package description.</description>
     <dependencies>
-
+      <group targetFramework="netstandard1.0">
+        <dependency id="System.Runtime" version="4.1.0-rc2-24027" />
+      </group>
+      <group targetFramework="netstandard1.5">
+        <dependency id="System.Net.Sockets" version="4.1.0-rc2-24027" />
+        <dependency id="System.Runtime" version="4.1.0-rc2-24027" />
+      </group>
     </dependencies>
   </metadata>
 </package>

@@ -46,114 +46,23 @@ namespace ReferenceGenerator
 
         static int Main(string[] args)
         {
-            // args 0: NuGetTargetMonikers -- .NETStandard,Version=v1.4  
-            // args 1: TFM's to generate, semi-colon joined. E.g.: auto;uap10.0 
-            // args 2: nuspec file
-            // args 3: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
-            // args 4: target files, semi-colon joined
-
+            
             try
             {
-                var nugetTargetMonikers = args[0].Split(';')
-                                                 .Where(s => !string.IsNullOrWhiteSpace(s))
-                                                 .Select(NuGetFramework.Parse)
-                                                 .Where(tfm => tfm.Framework != ".NETPlatform")
-                                                 .ToArray();
-                var tfms = args[1].Split(';')
-                                  .Where(s => !string.IsNullOrWhiteSpace(s))
-                                  .Select(NuGetFramework.Parse)
-                                  .ToArray();
-
-                var nuspecFile = args[2];
-
-                var projectFiles = args[3].Split(';')
-                                          .Where(s => !string.IsNullOrWhiteSpace(s))
-                                          .ToArray();
-                var files = args[4].Split(';')
-                                   .Where(s => !string.IsNullOrWhiteSpace(s))
-                                   .ToArray();
-
-
-                // calc target for PCL profiles
-                var firstTfm = nugetTargetMonikers.FirstOrDefault();
-                if (firstTfm != null)
+                if (args.Length == 5) // v1
                 {
-                    for (var i = 0; i < tfms.Length; i++)
-                    {
-                        // look for an unsupported TFM and calc the result
-                        if (!tfms[i].IsUnsupported)
-                            continue;
-
-                        if (firstTfm.IsPCL)
-                        {
-                            var profileVer = int.Parse(nugetTargetMonikers[0].Profile.Substring(7), CultureInfo.InvariantCulture);
-                            // map the PCL profile to a netstandard target
-                            tfms[i] = DefaultPortableFrameworkMappings.Instance.CompatibilityMappings.First(t => t.Key == profileVer)
-                                                                      .Value.Max;
-                        }
-                        else if (firstTfm.IsPackageBased)
-                        {
-                            tfms[i] = firstTfm;
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine(ErrorWithMessage.TargetFrameworkNotFound);
-                        }
-                    }
+                    GenerateV1(args);
+                }
+                else if (args.Length == 4) // v2
+                {
+                    GenerateV2(args);
+                }
+                else
+                {
+                    Console.Error.WriteLine(ErrorWithMessage.InvalidNumberOfArguments);
+                    return -1;
                 }
 
-
-                var packages = new List<PackageWithReference>();
-
-                for (var i = 0; i < projectFiles.Length; i++)
-                {
-                    var assm = AssemblyInfo.GetAssemblyInfo(files[i]);
-                    var projectFileName = Path.GetFileNameWithoutExtension(projectFiles[i]);
-
-                    var projDir = Path.GetDirectoryName(projectFiles[i]);
-                    if (File.Exists(Path.Combine(projDir, $"{projectFileName}.project.json")))
-                    {
-                        // ProjectName.Project.json
-                        var lockFile = Path.Combine(projDir, $"{projectFileName}.project.lock.json");
-
-                        var pkgs = ProjectEngine.GetProjectJsonPackages(lockFile, assm.References, nugetTargetMonikers);
-                        packages.AddRange(pkgs);
-                    }
-                    else if (File.Exists(Path.Combine(projDir, "project.json")))
-                    {
-                        // Project.json
-                        var lockFile = Path.Combine(projDir, "project.lock.json");
-                        var pkgs = ProjectEngine.GetProjectJsonPackages(lockFile, assm.References, nugetTargetMonikers);
-                        packages.AddRange(pkgs);
-                    }
-                    else if (File.Exists(Path.Combine(projDir, $"packages.{projectFileName}.config")))
-                    {
-                        var pkgs = ProjectEngine.GetPackagesConfigPackages(projectFiles[i], $"packages.{projectFileName}.config", assm.References);
-                        packages.AddRange(pkgs);
-                    }
-                    else if (File.Exists(Path.Combine(projDir, "packages.config")))
-                    {
-                        var pkgs = ProjectEngine.GetPackagesConfigPackages(projectFiles[i], "packages.config", assm.References);
-                        packages.AddRange(pkgs);
-                    }
-                    else
-                    {
-                        // Must be an "old" PCL without any refs. Best we can do is read the refs
-                        var pkgs = ProjectEngine.GetPackagesConfigPackages(projectFiles[i], null, assm.References);
-                        packages.AddRange(pkgs);
-                    }
-                }
-
-
-                // Now squash all but most recent
-                var groups = ProjectEngine.GetSortedMostRecentVersions(packages);
-
-                // make sure there is no mscorlib
-                if (groups.Any(g => string.Equals(g.Id, "mscorlib", StringComparison.OrdinalIgnoreCase)))
-                    throw new InvalidOperationException("mscorlib-based projects are not supported");
-
-
-                UpdateNuspecFile(nuspecFile, groups, tfms);
                 return 0;
             }
             catch (UnixNotSupportedException)
@@ -169,6 +78,152 @@ namespace ReferenceGenerator
 
                 return -1;
             }
+        }
+
+        static void GenerateV2(string[] args)
+        {
+            // args 0: path to project.json
+            // args 1: path to output base directory
+            // args 2: path to nuspec file
+
+            var projectFile = args[0];
+            var baseDirectory = args[1];
+            var dllFile = args[2];
+            var nuspecFile = args[3];
+
+
+            var projDir = Path.GetDirectoryName(projectFile);
+            var lockFile = Path.Combine(projDir, "project.lock.json");
+
+
+            var targets = ProjectEngine.GetTargetFrameworksFromProjectJson(lockFile);
+
+            foreach (var target in targets)
+            {
+                var lib = Path.Combine(baseDirectory, target.GetShortFolderName(), dllFile);
+                var assm = AssemblyInfo.GetAssemblyInfo(lib);
+                var pkgs = ProjectEngine.GetProjectJsonPackages(lockFile, assm.References, new [] {target});
+
+                // Now squash all but most recent
+                var groups = ProjectEngine.GetSortedMostRecentVersions(pkgs);
+
+                // make sure there is no mscorlib
+                if (groups.Any(g => string.Equals(g.Id, "mscorlib", StringComparison.OrdinalIgnoreCase)))
+                    throw new InvalidOperationException("mscorlib-based projects are not supported");
+
+
+                UpdateNuspecFile(nuspecFile, groups, new[] { target });
+            }
+        }
+
+        static void GenerateV1(string[] args)
+        {
+            // args 0: NuGetTargetMonikers -- .NETStandard,Version=v1.4  
+            // args 1: TFM's to generate, semi-colon joined. E.g.: auto;uap10.0 
+            // args 2: nuspec file
+            // args 3: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
+            // args 4: target files, semi-colon joined
+
+            var nugetTargetMonikers = args[0].Split(';')
+                                             .Where(s => !string.IsNullOrWhiteSpace(s))
+                                             .Select(NuGetFramework.Parse)
+                                             .Where(tfm => tfm.Framework != ".NETPlatform")
+                                             .ToArray();
+            var tfms = args[1].Split(';')
+                              .Where(s => !string.IsNullOrWhiteSpace(s))
+                              .Select(NuGetFramework.Parse)
+                              .ToArray();
+
+            var nuspecFile = args[2];
+
+            var projectFiles = args[3].Split(';')
+                                      .Where(s => !string.IsNullOrWhiteSpace(s))
+                                      .ToArray();
+            var files = args[4].Split(';')
+                               .Where(s => !string.IsNullOrWhiteSpace(s))
+                               .ToArray();
+
+
+            // calc target for PCL profiles
+            var firstTfm = nugetTargetMonikers.FirstOrDefault();
+            if (firstTfm != null)
+            {
+                for (var i = 0; i < tfms.Length; i++)
+                {
+                    // look for an unsupported TFM and calc the result
+                    if (!tfms[i].IsUnsupported)
+                        continue;
+
+                    if (firstTfm.IsPCL)
+                    {
+                        var profileVer = int.Parse(nugetTargetMonikers[0].Profile.Substring(7), CultureInfo.InvariantCulture);
+                        // map the PCL profile to a netstandard target
+                        tfms[i] = DefaultPortableFrameworkMappings.Instance.CompatibilityMappings.First(t => t.Key == profileVer)
+                                                                  .Value.Max;
+                    }
+                    else if (firstTfm.IsPackageBased)
+                    {
+                        tfms[i] = firstTfm;
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine(ErrorWithMessage.TargetFrameworkNotFound);
+                    }
+                }
+            }
+
+
+            var packages = new List<PackageWithReference>();
+
+            for (var i = 0; i < projectFiles.Length; i++)
+            {
+                var assm = AssemblyInfo.GetAssemblyInfo(files[i]);
+                var projectFileName = Path.GetFileNameWithoutExtension(projectFiles[i]);
+
+                var projDir = Path.GetDirectoryName(projectFiles[i]);
+                if (File.Exists(Path.Combine(projDir, $"{projectFileName}.project.json")))
+                {
+                    // ProjectName.Project.json
+                    var lockFile = Path.Combine(projDir, $"{projectFileName}.project.lock.json");
+
+                    var pkgs = ProjectEngine.GetProjectJsonPackages(lockFile, assm.References, nugetTargetMonikers);
+                    packages.AddRange(pkgs);
+                }
+                else if (File.Exists(Path.Combine(projDir, "project.json")))
+                {
+                    // Project.json
+                    var lockFile = Path.Combine(projDir, "project.lock.json");
+                    var pkgs = ProjectEngine.GetProjectJsonPackages(lockFile, assm.References, nugetTargetMonikers);
+                    packages.AddRange(pkgs);
+                }
+                else if (File.Exists(Path.Combine(projDir, $"packages.{projectFileName}.config")))
+                {
+                    var pkgs = ProjectEngine.GetPackagesConfigPackages(projectFiles[i], $"packages.{projectFileName}.config", assm.References);
+                    packages.AddRange(pkgs);
+                }
+                else if (File.Exists(Path.Combine(projDir, "packages.config")))
+                {
+                    var pkgs = ProjectEngine.GetPackagesConfigPackages(projectFiles[i], "packages.config", assm.References);
+                    packages.AddRange(pkgs);
+                }
+                else
+                {
+                    // Must be an "old" PCL without any refs. Best we can do is read the refs
+                    var pkgs = ProjectEngine.GetPackagesConfigPackages(projectFiles[i], null, assm.References);
+                    packages.AddRange(pkgs);
+                }
+            }
+
+
+            // Now squash all but most recent
+            var groups = ProjectEngine.GetSortedMostRecentVersions(packages);
+
+            // make sure there is no mscorlib
+            if (groups.Any(g => string.Equals(g.Id, "mscorlib", StringComparison.OrdinalIgnoreCase)))
+                throw new InvalidOperationException("mscorlib-based projects are not supported");
+
+
+            UpdateNuspecFile(nuspecFile, groups, tfms);
         }
 
         static void UpdateNuspecFile(string nuspecFile, IReadOnlyList<PackageWithReference> packages, IEnumerable<NuGetFramework> tfms)

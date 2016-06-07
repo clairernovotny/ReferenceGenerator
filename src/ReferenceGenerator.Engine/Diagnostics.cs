@@ -73,6 +73,7 @@ namespace ReferenceGenerator.Engine
     public class ErrorWithMessage : Error
     {
         public static readonly ErrorWithMessage TargetFrameworkNotFound = new ErrorWithMessage("TargetFrameworkName is not recognized as a PCL or package based framework. Specify NuSpecTfm instead of using 'auto'", "RG003");
+        public static readonly ErrorWithMessage InvalidNumberOfArguments = new ErrorWithMessage("Invalid number of arguments. Must be either 4or 5 depending on mode", "RG004");
 
         public ErrorWithMessage(Exception ex) : base("RG001")
         {

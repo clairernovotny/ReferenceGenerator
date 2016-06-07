@@ -158,6 +158,26 @@ namespace ReferenceGenerator.Engine
             return packages;
         }
 
+        public static IEnumerable<NuGetFramework> GetTargetFrameworksFromProjectJson(string lockFile)
+        {
+            if (!File.Exists(lockFile))
+                throw new InvalidOperationException("project.lock.json is missing");
+
+
+            JObject projectJson;
+            using (var reader = new JsonTextReader(File.OpenText(lockFile)))
+            {
+                projectJson = JObject.Load(reader);
+            }
+
+            var targets = ((JObject)projectJson["targets"])
+                                           .Properties()
+                                           .Select(p => NuGetFramework.Parse(p.Name))
+                                           .ToList();
+
+            return targets;
+        }
+
         public static IEnumerable<PackageWithReference> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, NuGetFramework[] nugetTargetMonikers)
         {
             // This needs to load the project.lock.json, look for the reference under the 
