@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
+using NuGet.Packaging;
 using ReferenceGenerator.Engine.Properties;
 
 namespace ReferenceGenerator.Engine
@@ -176,6 +177,59 @@ namespace ReferenceGenerator.Engine
                                            .ToList();
 
             return targets;
+        }
+
+        public static IEnumerable<PackageWithReference> GetPlatformPackages(string projectFile, NuGetFramework framework)
+        {
+            if (!File.Exists(projectFile))
+                throw new InvalidOperationException("project.json is missing");
+
+            JObject projectJson;
+            using (var reader = new JsonTextReader(File.OpenText(projectFile)))
+            {
+                projectJson = JObject.Load(reader);
+            }
+
+            var set = new HashSet<PackageWithReference>();
+
+            // 1. Look for global dependencies
+            var globalPlats = GetPlatformsForNode(projectJson);
+
+            set.AddRange(globalPlats);
+
+            // 2. Look for framework dependencies
+
+            // see if there is a node/deps for this tfm
+            var fxNode =  (from fx in ((JObject)projectJson["frameworks"]).Properties()
+                          let tfm = NuGetFramework.Parse(fx.Name)
+                          where tfm.Equals(framework)
+                          select (JObject)fx.Value)
+                          .Single();
+
+
+            var fxPlats = GetPlatformsForNode(fxNode);
+
+            set.AddRange(fxPlats);
+
+            return set;
+        }
+
+        static IEnumerable<PackageWithReference> GetPlatformsForNode(JObject parent)
+        {
+            JToken depsNode;
+            if (parent.TryGetValue("dependencies", out depsNode))
+            {
+                var plats = from depNode in ((JObject)depsNode).Properties()
+                            where depNode.Value?.Type == JTokenType.Object
+                            let dep = (JObject)depNode.Value
+                            from prop in dep.Properties()
+                            where prop.Name == "type" && string.Equals("platform", prop.Value.Value<string>(), StringComparison.OrdinalIgnoreCase)
+                            select new PackageWithReference(depNode.Name, dep.Property("version").Value.Value<string>(), null);
+
+                return plats;
+            }
+
+            return Enumerable.Empty<PackageWithReference>();
         }
 
         public static IEnumerable<PackageWithReference> GetProjectJsonPackages(string lockFile, IEnumerable<Reference> refs, NuGetFramework[] nugetTargetMonikers)
