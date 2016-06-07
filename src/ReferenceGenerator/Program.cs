@@ -84,7 +84,8 @@ namespace ReferenceGenerator
         {
             // args 0: path to project.json
             // args 1: path to output base directory
-            // args 2: path to nuspec file
+            // args 2: name of library
+            // args 3: path to nuspec file
 
             var projectFile = args[0];
             var baseDirectory = args[1];
