@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>SampleCrossCompiledLibrary</id>
+    <version>1.0.0</version>
+    <authors>Author</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>My package description.</description>
+    <dependencies>
+
+    </dependencies>
+  </metadata>
+</package>

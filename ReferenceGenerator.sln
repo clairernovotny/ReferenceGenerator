@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25008.0
+VisualStudioVersion = 14.0.25401.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReferenceGenerator", "src\ReferenceGenerator\ReferenceGenerator.csproj", "{D3F17CBE-FC99-4B13-92CC-0AD3A1CDEFE7}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -34,6 +34,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Libraries", "Test Libraries", "{9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReferenceGenerator.Engine", "src\ReferenceGenerator.Engine\ReferenceGenerator.Engine.csproj", "{3355807C-CA78-4B0C-8EFA-5015CAED676C}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SampleCrossCompiledLibrary", "tests\SampleCrossCompiledLibrary\SampleCrossCompiledLibrary.xproj", "{F5065EAD-90DE-4E76-BF95-B76C20C4B924}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -159,6 +161,22 @@ Global
 		{3355807C-CA78-4B0C-8EFA-5015CAED676C}.Release|x64.Build.0 = Release|Any CPU
 		{3355807C-CA78-4B0C-8EFA-5015CAED676C}.Release|x86.ActiveCfg = Release|Any CPU
 		{3355807C-CA78-4B0C-8EFA-5015CAED676C}.Release|x86.Build.0 = Release|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Debug|ARM.Build.0 = Debug|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Debug|x64.Build.0 = Debug|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Debug|x86.Build.0 = Debug|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Release|ARM.ActiveCfg = Release|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Release|ARM.Build.0 = Release|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Release|x64.ActiveCfg = Release|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Release|x64.Build.0 = Release|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Release|x86.ActiveCfg = Release|Any CPU
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -169,5 +187,6 @@ Global
 		{DA03B415-AE61-4218-82B9-F5CFF0B7AF88} = {9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}
 		{A0C3BAA3-ABAF-44B6-B117-2F265A07F7A8} = {9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}
 		{BE5157E5-169A-4DD9-B514-F114FBCE1612} = {9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}
+		{F5065EAD-90DE-4E76-BF95-B76C20C4B924} = {9DB4244F-31FF-43C0-9D6C-0DBD816CFD93}
 	EndGlobalSection
 EndGlobal
