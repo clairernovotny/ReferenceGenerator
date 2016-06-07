@@ -179,7 +179,7 @@ namespace ReferenceGenerator.Engine
             return targets;
         }
 
-        public static IEnumerable<PackageWithReference> GetPlatformPackages(string projectFile, NuGetFramework framework)
+        public static IEnumerable<PackageWithReference> GetNonReferencePackages(string projectFile, NuGetFramework framework)
         {
             if (!File.Exists(projectFile))
                 throw new InvalidOperationException("project.json is missing");
@@ -223,7 +223,8 @@ namespace ReferenceGenerator.Engine
                             where depNode.Value?.Type == JTokenType.Object
                             let dep = (JObject)depNode.Value
                             from prop in dep.Properties()
-                            where prop.Name == "type" && string.Equals("platform", prop.Value.Value<string>(), StringComparison.OrdinalIgnoreCase)
+                            where prop.Name == "type" && (string.Equals("platform", prop.Value.Value<string>(), StringComparison.OrdinalIgnoreCase) ||
+                                                          string.Equals("build", prop.Value.Value<string>(), StringComparison.OrdinalIgnoreCase))
                             select new PackageWithReference(depNode.Name, dep.Property("version").Value.Value<string>(), null);
 
                 return plats;

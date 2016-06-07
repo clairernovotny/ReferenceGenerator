@@ -105,7 +105,7 @@ namespace ReferenceGenerator
                 var assm = AssemblyInfo.GetAssemblyInfo(lib);
                 var pkgs = ProjectEngine.GetProjectJsonPackages(lockFile, assm.References, new [] {target});
 
-                var platforms = ProjectEngine.GetPlatformPackages(projectFile, target);
+                var platforms = ProjectEngine.GetNonReferencePackages(projectFile, target);
                 pkgs = pkgs.Except(platforms);
 
                 // Now squash all but most recent
