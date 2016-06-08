@@ -41,10 +41,10 @@
 
     <!-- Build the command here as quotes are easier this way -->
     <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" "$(NuGetTargetMoniker);$(_NuGetTargetFallbackMoniker)" $(NuSpecTfm) "@(NuSpecFile)" "@(NuSpecProjectFile)" "@(NuSpecLibContent)"</RefGenExecCmd>
+      <RefGenExecCmd>"$(MSBuildThisFileDirectory)..\..\tools\RefGen.exe" generate-single -m "$(NuGetTargetMoniker);$(_NuGetTargetFallbackMoniker)" -t $(NuSpecTfm) -n "@(NuSpecFile)" -p "@(NuSpecProjectFile)" -f "@(NuSpecLibContent)"</RefGenExecCmd>
     </PropertyGroup>
     <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
-      <RefGenExecCmd>mono "$(MSBuildThisFileDirectory)../../tools/RefGen.exe" "$(NuGetTargetMoniker);$(_NuGetTargetFallbackMoniker)" $(NuSpecTfm) "@(NuSpecFile)" "@(NuSpecProjectFile)" "@(NuSpecLibContent)"</RefGenExecCmd>
+      <RefGenExecCmd>mono "$(MSBuildThisFileDirectory)../../tools/RefGen.exe" generate-single -m "$(NuGetTargetMoniker);$(_NuGetTargetFallbackMoniker)" -t $(NuSpecTfm) -n "@(NuSpecFile)" -p "@(NuSpecProjectFile)" -f "@(NuSpecLibContent)"</RefGenExecCmd>
     </PropertyGroup>
 
     <Exec Command="$(RefGenExecCmd)" Condition="'$(OS)' == 'Windows_NT'" />

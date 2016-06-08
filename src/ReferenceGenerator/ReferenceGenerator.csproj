@@ -16,7 +16,7 @@
     <StartWorkingDirectory>$(SolutionDir)</StartWorkingDirectory>
     <StartAction>Project</StartAction>
     <!--<StartArguments>".NETPlatform,Version=v5.4" netstandard1.3 "tests\SampleNetStandard11Library\SampleNetStandard11Library.nuspec"  "tests\SampleNetStandard11Library\SampleNetStandard11Library.csproj"  "tests\SampleNetStandard11Library\bin\Debug\SampleNetStandard11Library.dll"</StartArguments>-->
-    <StartArguments>".NETPortable,Version=v4.5,Profile=Profile259" netstandard1.0 "tests\SampleProjJsonPcl\SampleProjJsonPcl.nuspec"  "tests\SampleProjJsonPcl\SampleProjJsonPcl.csproj"  "tests\SampleProjJsonPcl\bin\Debug\SampleProjJsonPcl.dll"</StartArguments>
+    <StartArguments>generate-single -m ".NETPortable,Version=v4.5,Profile=Profile259" -t netstandard1.0 -n "tests\SampleProjJsonPcl\SampleProjJsonPcl.nuspec"  -p "tests\SampleProjJsonPcl\SampleProjJsonPcl.csproj"  -f "tests\SampleProjJsonPcl\bin\Debug\SampleProjJsonPcl.dll"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>

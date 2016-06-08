@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.XPath;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -44,25 +45,97 @@ namespace ReferenceGenerator
             return deps;
         }
 
+        enum Command 
+        {
+           Single,
+           Cross
+        }
+
         static int Main(string[] args)
         {
             
+            
             try
             {
-                if (args.Length == 5) // v1
+                if (args.Length > 0 && (args[0].StartsWith("\"") || args[0].StartsWith(".")))
                 {
+                    // HACK: detect param 1 based on starting with a " or a .
                     GenerateV1(args);
-                }
-                else if (args.Length == 4) // v2
-                {
-                    GenerateV2(args);
                 }
                 else
                 {
-                    Console.Error.WriteLine(ErrorWithMessage.InvalidNumberOfArguments);
-                    return -1;
-                }
 
+                    var command = Command.Single;
+                    string project = null;
+                    string baseDirectory = null;
+                    string libraryName = null;
+                    string nuSpec = null;
+                    string moniker = null;
+                    string tfms = null;
+                    string files = null;
+
+                    ArgumentSyntax.Parse(args, syntax =>
+                    {
+                        // args 0: NuGetTargetMonikers -- .NETStandard,Version=v1.4  
+                        // args 1: TFM's to generate, semi-colon joined. E.g.: auto;uap10.0 
+                        // args 2: nuspec file
+                        // args 3: project file (csproj/vbproj, etc). Used to look for packages.config/project.json and references. should match order of target files
+                        // args 4: target files, semi-colon joined
+                        syntax.DefineCommand("generate-single", ref command, Command.Single, "Single platform");
+                        syntax.DefineOption("m|moniker", ref moniker, "NuGetTargetMonikers -- .NETStandard,Version=v1.4");
+                        syntax.DefineOption("t|tfm", ref tfms, "TFM\'s to generate, semi-colon joined. E.g.: auto;uap10.0");
+                        syntax.DefineOption("n|nuspec", ref nuSpec, "Full path to NuSpec");
+                        syntax.DefineOption("p|project", ref project, "Path to project file");
+                        syntax.DefineOption("f|file", ref files, "target files, semi-colon joined");
+
+                        
+                        syntax.DefineCommand("generate-cross", ref command, Command.Cross, "Cross Platform");
+                        syntax.DefineOption("p|project", ref project, "Path to project file");
+                        syntax.DefineOption("d|directory", ref baseDirectory, "Base directory where output folders are created");
+                        syntax.DefineOption("n|nuspec", ref nuSpec, "Full path to NuSpec");
+                        syntax.DefineOption("l|library", ref libraryName, "Library name, including .dll");
+
+                        
+                        // common validation
+                        if (string.IsNullOrWhiteSpace(project))
+                            syntax.ReportError("project is required");
+                        if (string.IsNullOrWhiteSpace(nuSpec))
+                            syntax.ReportError("nuspec is required");
+                        
+
+                        if (command == Command.Single)
+                        {
+                            if (string.IsNullOrWhiteSpace(moniker))
+                                syntax.ReportError("moniker is required");
+
+                            if (string.IsNullOrWhiteSpace(tfms))
+                                syntax.ReportError("tfm is required");
+
+                            if (string.IsNullOrWhiteSpace(files))
+                                syntax.ReportError("file is required");
+                        }
+
+                        if (command == Command.Cross)
+                        {
+                            if (string.IsNullOrWhiteSpace(baseDirectory))
+                                syntax.ReportError("directory is required");
+                            if (string.IsNullOrWhiteSpace(libraryName))
+                                syntax.ReportError("library is required");
+                        }
+                        
+                    });
+
+                    if (command == Command.Single)
+                    {
+                        GenerateV1(new [] {moniker, tfms, nuSpec, project, files});
+                    }
+                    else if (command == Command.Cross)
+                    {
+                        GenerateV2(project, baseDirectory, libraryName, nuSpec);
+                    }
+
+                }
+                
                 return 0;
             }
             catch (UnixNotSupportedException)
@@ -80,18 +153,8 @@ namespace ReferenceGenerator
             }
         }
 
-        static void GenerateV2(string[] args)
+        static void GenerateV2(string projectFile, string baseDirectory, string dllFile, string nuspecFile)
         {
-            // args 0: path to project.json
-            // args 1: path to output base directory
-            // args 2: name of library
-            // args 3: path to nuspec file
-
-            var projectFile = args[0];
-            var baseDirectory = args[1];
-            var dllFile = args[2];
-            var nuspecFile = args[3];
-
 
             var projDir = Path.GetDirectoryName(projectFile);
             var lockFile = Path.Combine(projDir, "project.lock.json");
