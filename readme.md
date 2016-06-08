@@ -148,7 +148,7 @@ This tool is a command line that you can call in other ways. The parameters are 
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
 
 ## Changelog
-- 2.0.0-beta-bld*xx*: Support for cross-compiled xproj. Updated command line options
+- 2.0.0-beta-bld12: Support for cross-compiled xproj. Updated command line options
 - 2.0.0-beta1: Initial support for `netstandard` and .NET Core RC2
 - 1.4.2: Add a more descriptive error message for NuSpec files that have incorrect XML namespace declarations
 - 1.4.1: Issue warning and do not run RefGen on non-Windows systems until full mono compatibility is tested and verified. Prevents breaking builds.
