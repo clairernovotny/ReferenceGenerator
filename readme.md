@@ -20,7 +20,8 @@ If you have existing package dependencies in your nuspec in the group that aren'
 When you author your nuspec package, make sure that your library goes into the `\lib\netstandard1.x` directory, where x depends on your library. PCL 259's are all `netstandard1.0`.
 
 ## Packages containing `netstandard` and existing libraries
-If you have a package that contains a `netstandard` group and targets both new and old platforms, you might need an extra step in your nuspec. This depends on what packages you actually reference in your `netstandard` section. You might need to add some or all of the following. The 2.0 version will add these (and more) to minimize the impact on users with `packages.config`:
+If you have a package that contains a `netstandard` group and your users use `packages.config`, you may want to add blank dependency groups. Note that Xamarin Studio 6.1, currently in the alpha channel, supports `project.json` and that is the recommended solution.
+
 ```xml
 <group targetFramework="net45" />
 <group targetFramework="wp8" />
@@ -36,9 +37,9 @@ For example, if you're putting a Profile 151 library in `netstandard1.1`, then y
 ```xml
 <group targetFramework="net45" />
 ```
-to ensure that those older platforms don't try to add references to the newer dependencies specified in your `dotnet` section.
+to ensure that those older platforms don't try to add references to the newer dependencies specified in your `netstandard` section.
 
-To sum this up, look at the output of the tool for the `dotnet` section. If you have a System.Runtime higher than 4.0.0, and you want to to target `net45`, `wp8`, `win8`,  `xamarin.ios`, `monotouch`, or `monoandroid`, then you need to block the `dotnet` dependency group by adding blank dependency groups for the other platforms.
+To sum this up, look at the output of the tool for the `netstandard` section. If you have a System.Runtime higher than 4.0.0, and you want to to target `net45`, `wp8`, `win8`,  `xamarin.ios`, `monotouch`, or `monoandroid`, then you need to block the `netstandard` dependency group by adding blank dependency groups for the other platforms.
 
 ## Options and overriding default behavior
 
@@ -96,7 +97,43 @@ In some cases, you may need to have multiple dependency groups, like having both
 </PropertyGroup>
 ```
 
-## Command line
+## Command line (2.0)
+This tool is a command line that you can call in other ways. The command line exposes additional features targeted at NuGet packages containing cross-compiled libraries. The general syntax for the command line is: `RefGen.exe` `command` `options`. All of the options are required for each command but the order doesn't matter.
+
+There are two commands
+
+| Command | Description |
+|---------|-------------|
+| generate-single | Single library wtih a fixed set of functionality (eg. PCL 259 or `netstandard1.0`). Usable with `csproj`/`vbproj`-based projects that use either `packages.config` or `project.json` for their packages |
+| generate-cross | Library that's cross-compiled enabling more functionality on newer platforms (eg. `netstandard1.0` and `netstandard1.3`). Only usable with `xproj`-based project that use `project.json` for cross-compiling to several target frameworks |
+
+### generate-single options
+This is the same functionality that RefGen 1.0 had, extended with support for .NET Standard.
+
+| Switch | Description |
+| ----   | ---- |
+| -m or --moniker | NuGetTargetMonikers -- .NETStandard,Version=v1.4 |
+| -t or --tfm | TFM's to generate, semi-colon joined. E.g.: auto;uap10.0 |
+| -n or --nuspec | Full path to NuSpec file |
+| -p or --project | Full path to project file (csproj/vbproj) |
+| -f or --file | Full path target files, semi-colon joined |
+
+### generate-cross options
+This functionality is new in version 2.0 and enables the use of xproj/project.json-based cross-compiling projects. It requires use a NuSpec file as calling `dotnet pack project.json` doesn't provide a way of trimming the dependencies list.
+
+In this model, you'd typically have a `project.json` dependency on `NETStandard.Library`. The issue is that when creating your NuPkg, it's better to list the individual dependencies you require instead of a giant meta-package. This RefGen tool enables this scenario.
+
+| Switch | Description |
+| ---- | --- |
+| -p or --project | Full path to project file (`project.json`) |
+| -d or --directory | Path to base directory where the output folders are created per target framework). The output would be in `<directory>\netstandard1.0\MyLib.dll` for example. |
+| -n or --nuspec | Full path to the nuspec file |
+| -l or --library | Library name, including .dll. `MyLibrary.dll`, for example |  
+
+### Upgrading from 1.x
+The 2.0 version will detect/use the 1.x command line options. Updating should not break your scripts.
+
+## Command line (1.x)
 This tool is a command line that you can call in other ways. The parameters are as follows and they are all required:
 
 ```
@@ -111,6 +148,7 @@ This tool is a command line that you can call in other ways. The parameters are 
 - This tool does not currently run on mono if you're using an "classic PCL". The tool needs all of the PCL contracts from the `Reference Assemblies` folder for comparison; if there's an equiv on Mono, then this could be fixed. Alternatively, if you only need project.json based projects, then there's no limitation.
 
 ## Changelog
+- 2.0.0-beta-bld*xx*: Support for cross-compiled xproj. Updated command line options
 - 2.0.0-beta1: Initial support for `netstandard` and .NET Core RC2
 - 1.4.2: Add a more descriptive error message for NuSpec files that have incorrect XML namespace declarations
 - 1.4.1: Issue warning and do not run RefGen on non-Windows systems until full mono compatibility is tested and verified. Prevents breaking builds.
